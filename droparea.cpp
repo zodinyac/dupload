@@ -33,6 +33,11 @@ void dropArea::lock( bool l )
 		settext( "drop\nhere" );
 }
 
+bool dropArea::isLocked()
+{
+	return locked;
+}
+
 void dropArea::settext( QString text )
 {
 	QString tpl = "<p align=\"center\"><span style=\"font-size:20pt; font-weight:600;\">%1</span></p>";

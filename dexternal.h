@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.ru>
+ *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,38 +13,33 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DROPAREA_H
-#define DROPAREA_H
+#ifndef DEXTERNAL_H
+#define DEXTERNAL_H
 
-#include <QLabel>
-#include <QUrl>
-#include <QFileInfo>
-#include <QDropEvent>
+#include <QInputDialog>
+#include <QMessageBox>
+#include "dupload.h"
 
-class dropArea : public QLabel
+class dUpload;
+
+class dExternal : public QObject
 {
 	Q_OBJECT
 
 public:
-	dropArea( QWidget *parent=0 );
-	void lock( bool l = true );
-	void settext( QString text );
-	bool isLocked();
+	dExternal( dUpload *d );
+	~dExternal();
 
-signals:
-	void changed( const QString &fileName );
-	void clicked();
+	static dExternal *instance( dUpload *d );
 
-protected:
-	void dragEnterEvent( QDragEnterEvent *event );
-	void dragLeaveEvent( QDragLeaveEvent *event );
-	void dragMoveEvent( QDragMoveEvent *event );
-	void dropEvent( QDropEvent *event );
-	void mousePressEvent( QMouseEvent *event );
+public slots:
+	void finished( QNetworkReply *reply );
 
 private:
-	QLabel *label;
-	bool locked;
+	void get( const QString &w, const QString &p = "" );
+	dUpload *m_dupload;
+
+	QNetworkAccessManager *m_netman;
 };
 
-#endif // DROPAREA_H
+#endif // DEXTERNAL_H

@@ -1,1 +1,12 @@
-IDI_ICON1 ICON DISCARDABLE "dUpload.ico"
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource."
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "dUpload.ico"

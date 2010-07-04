@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.ru>
+ *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -21,6 +21,9 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	ui.progress->setVisible( false );
 	move( qApp->desktop()->geometry().center() - rect().center() );
 
+	m_icon.addFile( ":/dUpload.ico" );
+	setWindowIcon( m_icon );
+
 	droparea = new dropArea();
 	connect( droparea, SIGNAL( changed( const QString & ) ), this, SLOT( changed( const QString & ) ) );
 	connect( droparea, SIGNAL( clicked() ), this, SLOT( clicked() ) );
@@ -28,6 +31,8 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	m_netman = new QNetworkAccessManager();
 	connect( m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
+
+	m_trayicon = new dTrayIcon( this );
 
 #if defined( Q_OS_WIN )
 	TCHAR winUserName[UNLEN + 1];
@@ -43,6 +48,8 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 #else
 	m_userlogin = "unknown";
 #endif
+
+	dExternal::instance( this );
 
 	if ( QFileInfo( file ).isFile() )
 		changed( file );
@@ -88,29 +95,65 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	data.append( end.toUtf8() );
 
 	request.setRawHeader( "User-Agent", QString( "iDelta" ).toUtf8() );
-	request.setRawHeader( "Accept", QString( "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1" ).toUtf8() );
+	request.setRawHeader( "Accept", QString( "text/html" ).toUtf8() ); 
 	request.setRawHeader( "Content-Length", QString::number( data.length() ).toUtf8() );
 	request.setRawHeader( "Content-Type", QString( "multipart/form-data; boundary=----------TSrVsleyvjLUMocQf0NMuB" ).toUtf8() );
 	
 	QNetworkReply* netr = m_netman->post( request, data );
 	connect( netr, SIGNAL( uploadProgress( qint64, qint64 ) ), this, SLOT( progress( qint64, qint64 ) ) );
+#if defined( DTASKBARACTIVE )
+	dTaskBar::instance()->setProgressState( this->winId(), 1 );
+#endif // DTASKBARACTIVE
+}
+
+void dUpload::sendFromClipboard( int type )
+{
+	if ( droparea->isLocked() )
+		return;
+
+	QByteArray arr;
+	QBuffer buffer( &arr );
+	buffer.open( QIODevice::WriteOnly );
+
+	if ( type == 0 )
+	{
+		QApplication::clipboard()->image().save( &buffer, "JPEG" );
+		load( arr, "jpeg", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".jpg" );
+	}
+	else if ( type == 1 )
+	{
+		QApplication::clipboard()->image().save( &buffer, "PNG" );
+		load( arr, "png", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".png" );
+	}
 }
 
 void dUpload::progress( qint64 received, qint64 total )
 {
 	ui.progress->setMaximum( total );
 	ui.progress->setValue( received );
+	m_trayicon->message( QString::number( received ) + " bytes of " + QString::number( total ), 1 );
+
+#if defined( DTASKBARACTIVE )
+	dTaskBar::instance()->setProgressValue( this->winId(), received, total );
+#endif // DTASKBARACTIVE
 }
 
 void dUpload::finished( QNetworkReply *reply )
 {
+#if defined( DTASKBARACTIVE )
+	dTaskBar::instance()->setProgressState( this->winId() );
+#endif // DTASKBARACTIVE
+
 	QString r = reply->readAll();
 
 	droparea->lock( false );
 	droparea->setVisible( true );
 	ui.progress->setVisible( false );
 	if( r.startsWith( "E:" ) )
+	{
 		droparea->settext( r );
+		m_trayicon->message( r, 2 );
+	}
 	else
 	{
 		m_filename = r;
@@ -119,6 +162,7 @@ void dUpload::finished( QNetworkReply *reply )
 		QApplication::clipboard()->setText( m_link );
 		droparea->settext( "OK" );
 		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
+		m_trayicon->message( m_link );
 	}
 
 	reply->deleteLater();
@@ -137,31 +181,28 @@ void dUpload::clicked()
 	}
 }
 
+void dUpload::closeEvent( QCloseEvent *event )
+{
+	delete m_netman;
+	m_trayicon->deleteLater();
+#if defined( DTASKBARACTIVE )
+	delete dTaskBar::instance();
+#endif // DTASKBARACTIVE
+}
+
 void dUpload::keyPressEvent( QKeyEvent *event )
 {
-	if ( event->key() == Qt::Key_T || event->key() == Qt::Key_P )
+	if ( event->nativeVirtualKey() == 84 || event->nativeVirtualKey() == 80 )
 	{
 		if ( !m_filename.isEmpty() )
 			m_preview = new dPreview( m_filename );
 	}
-	else if ( event->key() == Qt::Key_B )
-	{
-		QByteArray arr;
-		QBuffer buffer( &arr );
-		buffer.open( QIODevice::WriteOnly );
-
-		QApplication::clipboard()->image().save( &buffer, "JPEG" );
-		load( arr, "jpeg", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".jpg" );
-	}
-	else if ( event->key() == Qt::Key_N )
-	{
-		QByteArray arr;
-		QBuffer buffer( &arr );
-		buffer.open( QIODevice::WriteOnly );
-
-		QApplication::clipboard()->image().save( &buffer, "PNG" );
-		load( arr, "png", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".png" );
-	}
+	else if ( event->nativeVirtualKey() == 72 )
+		hide();
+	else if ( event->nativeVirtualKey() == 66 )
+		sendFromClipboard();
+	else if ( event->nativeVirtualKey() == 78 )
+		sendFromClipboard( 1 );
 }
 
 void dUpload::mousePressEvent( QMouseEvent *event )
@@ -173,7 +214,5 @@ void dUpload::mousePressEvent( QMouseEvent *event )
 void dUpload::mouseMoveEvent( QMouseEvent *event )
 {
 	if( event->buttons() & Qt::LeftButton )
-	{
 		move( event->globalPos() - m_drag_pos );
-	}
 }

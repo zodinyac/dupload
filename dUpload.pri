@@ -7,15 +7,25 @@
 HEADERS += ./dpreview.h \
     ./droparea.h \
     ./dupload.h \
-    ./qtwin.h
+    ./qtwin.h \
+    ./dtrayicon.h \
+    ./dtaskbar.h \
+    ./resource.h \
+    ./dexternal.h
 
 #Source files
 SOURCES += ./dpreview.cpp \
     ./droparea.cpp \
     ./dupload.cpp \
     ./main.cpp \
-    ./qtwin.cpp
+    ./qtwin.cpp \
+    ./dtrayicon.cpp \
+    ./dtaskbar.cpp \
+    ./dexternal.cpp
 
 #Forms
 FORMS += ./dpreview.ui \
     ./dupload.ui
+
+#Resource file(s)
+RESOURCES += ./dUpload.qrc

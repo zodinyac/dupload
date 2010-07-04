@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.ru>
+ *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,38 +13,36 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DROPAREA_H
-#define DROPAREA_H
+#ifndef DTASKBAR_H
+#define DTASKBAR_H
 
-#include <QLabel>
-#include <QUrl>
-#include <QFileInfo>
-#include <QDropEvent>
+#include "dupload.h"
 
-class dropArea : public QLabel
+#if defined( Q_OS_WIN )
+
+#include <windows.h>
+
+#if (WINVER >= 0x0601)
+#define DTASKBARACTIVE
+
+#include <shobjidl.h>
+
+class dTaskBar
 {
-	Q_OBJECT
-
 public:
-	dropArea( QWidget *parent=0 );
-	void lock( bool l = true );
-	void settext( QString text );
-	bool isLocked();
+	dTaskBar();
+	~dTaskBar();
+	static dTaskBar *instance();
 
-signals:
-	void changed( const QString &fileName );
-	void clicked();
-
-protected:
-	void dragEnterEvent( QDragEnterEvent *event );
-	void dragLeaveEvent( QDragLeaveEvent *event );
-	void dragMoveEvent( QDragMoveEvent *event );
-	void dropEvent( QDropEvent *event );
-	void mousePressEvent( QMouseEvent *event );
+	void setProgressState( HWND wid, int state = 0 );
+	void setProgressValue( HWND wid, qint64 received = 0, qint64 total = 0 );
 
 private:
-	QLabel *label;
-	bool locked;
+	bool init();
+
+	ITaskbarList3 *m_taskbarlist;
 };
 
-#endif // DROPAREA_H
+#endif // WINVER >= 0x0601
+#endif // Q_OS_WIN
+#endif // DTASKBAR_H

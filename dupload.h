@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.ru>
+ *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -26,6 +26,9 @@
 #include "ui_dupload.h"
 #include "droparea.h"
 #include "dpreview.h"
+#include "dtrayicon.h"
+#include "dtaskbar.h"
+#include "dexternal.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
@@ -35,6 +38,8 @@
 	#include <unistd.h>
 #endif
 
+class dTrayIcon;
+
 class dUpload : public QWidget
 {
 	Q_OBJECT
@@ -43,6 +48,9 @@ public:
 	dUpload( const QString &file, QWidget *parent = 0 );
 	~dUpload();
 
+	void sendFromClipboard( int type = 0 );
+	const QString &getUserLogin() { return m_userlogin; }
+
 public slots:
 	void progress( qint64 received, qint64 total );
 	void finished( QNetworkReply *reply );
@@ -50,6 +58,7 @@ public slots:
 	void clicked();
 
 protected:
+	void closeEvent( QCloseEvent *event );
 	void keyPressEvent( QKeyEvent *event );
 	void mouseMoveEvent( QMouseEvent* event );
 	void mousePressEvent( QMouseEvent* event );
@@ -62,6 +71,9 @@ private:
 	QPoint m_drag_pos;
 
 	dPreview *m_preview;
+	dTrayIcon *m_trayicon;
+
+	QIcon m_icon;
 
 	dropArea *droparea;
 	QNetworkAccessManager *m_netman;

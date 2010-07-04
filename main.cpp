@@ -26,7 +26,7 @@ int main( int argc, char *argv[] )
 
 	dUpload w( file );
 	w.setWindowFlags( Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint );
-    if ( QtWin::isCompositionEnabled() )
+	if ( QtWin::isCompositionEnabled() )
 		QtWin::extendFrameIntoClientArea( &w );
 	w.show();
 

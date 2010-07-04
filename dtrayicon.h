@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.ru>
+ *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,38 +13,37 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DROPAREA_H
-#define DROPAREA_H
+#ifndef DTRAYICON_H
+#define DTRAYICON_H
 
-#include <QLabel>
-#include <QUrl>
-#include <QFileInfo>
-#include <QDropEvent>
+#include <QAction>
+#include <QMenu>
+#include <QSystemTrayIcon>
+#include "dupload.h"
 
-class dropArea : public QLabel
+class dUpload;
+
+class dTrayIcon : public QSystemTrayIcon
 {
 	Q_OBJECT
 
 public:
-	dropArea( QWidget *parent=0 );
-	void lock( bool l = true );
-	void settext( QString text );
-	bool isLocked();
+	dTrayIcon( dUpload *d );
+	~dTrayIcon();
 
-signals:
-	void changed( const QString &fileName );
-	void clicked();
+	void message( const QString &s, int type = 0 );
 
-protected:
-	void dragEnterEvent( QDragEnterEvent *event );
-	void dragLeaveEvent( QDragLeaveEvent *event );
-	void dragMoveEvent( QDragMoveEvent *event );
-	void dropEvent( QDropEvent *event );
-	void mousePressEvent( QMouseEvent *event );
+public slots:
+	void activated( QSystemTrayIcon::ActivationReason r );
+	void messageClicked();
+	void menuTriggered( QAction *a );
 
 private:
-	QLabel *label;
-	bool locked;
+	dUpload *m_dupload;
+
+	QString m_link;
+
+	QMenu m_menu;
 };
 
-#endif // DROPAREA_H
+#endif // DTRAYICON_H
