@@ -18,7 +18,6 @@
 dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 {
 	ui.setupUi( this );
-
 	ui.progress->setVisible( false );
 
 	droparea = new dropArea();
@@ -56,15 +55,22 @@ void dUpload::changed( const QString &file )
 	if ( !f.open( QIODevice::ReadOnly ) )
 		return;
 
-	droparea->lock();
-	droparea->setVisible( false );
-	ui.progress->setValue( 0 );
-	ui.progress->setVisible( true );
-
 	QString filename = file.section( "/", -1 );
 	QString type = file.section( ".", -1 ).toLower();
 	if ( type == "jpg" )
 		type = "jpeg";
+
+	load( f.readAll(), type, filename );
+
+	f.close();
+}
+
+void dUpload::load( const QByteArray &arr, const QString &type, const QString &filename )
+{
+	droparea->lock();
+	droparea->setVisible( false );
+	ui.progress->setValue( 0 );
+	ui.progress->setVisible( true );
 
 	QByteArray data;
 	QNetworkRequest request( QUrl( "http://i.deltaz.ru/upload.php" ) );
@@ -75,8 +81,8 @@ void dUpload::changed( const QString &file )
 
 	data.append( author.toUtf8() );
 	data.append( begin.toUtf8() );
-	data.append( f.readAll() );
-	f.close();
+	data.append( arr );
+
 	data.append( end.toUtf8() );
 
 	request.setRawHeader( "User-Agent", QString( "iDelta" ).toUtf8() );
@@ -105,7 +111,9 @@ void dUpload::finished( QNetworkReply *reply )
 		droparea->settext( r );
 	else
 	{
-		m_link = "http://i.deltaz.ru/" + r;
+		m_filename = r;
+		m_link = "http://i.deltaz.ru/" + m_filename;
+
 		QApplication::clipboard()->setText( m_link );
 		droparea->settext( "OK" );
 		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
@@ -122,6 +130,34 @@ void dUpload::clicked()
 		droparea->settext( "drop\nhere" );
 		droparea->setToolTip( "" );
 
+		m_filename.clear();
 		m_link.clear();
+	}
+}
+
+void dUpload::keyPressEvent( QKeyEvent *event )
+{
+	if ( event->key() == Qt::Key_T || event->key() ==  Qt::Key_P )
+	{
+		if ( !m_filename.isEmpty() )
+			m_preview = new dPreview( m_filename );
+	}
+	else if ( event->key() == Qt::Key_B )
+	{
+		QByteArray arr;
+		QBuffer buffer( &arr );
+		buffer.open( QIODevice::WriteOnly );
+
+		QApplication::clipboard()->image().save( &buffer, "JPG" );
+		load( arr, "jpeg", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".jpeg" );
+	}
+	else if ( event->key() == Qt::Key_N )
+	{
+		QByteArray arr;
+		QBuffer buffer( &arr );
+		buffer.open( QIODevice::WriteOnly );
+
+		QApplication::clipboard()->image().save( &buffer, "PNG" );
+		load( arr, "png", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".png" );
 	}
 }

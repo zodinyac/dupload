@@ -13,52 +13,30 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DUPLOAD_H
-#define DUPLOAD_H
+#ifndef DPREVIEW_H
+#define DPREVIEW_H
 
 #include <QWidget>
-#include <QPixmap>
-#include <QFile>
-#include <QClipboard>
+#include <QDialog>
 #include <QtNetwork>
-#include "ui_dupload.h"
-#include "droparea.h"
-#include "dpreview.h"
+#include "ui_dpreview.h"
 
-#ifdef Q_OS_WIN
-#include <windows.h>
-#include <lmcons.h>
-#endif
-
-class dUpload : public QWidget
+class dPreview : public QDialog
 {
 	Q_OBJECT
 
 public:
-	dUpload( const QString &file, QWidget *parent = 0 );
-	~dUpload();
+	dPreview( const QString &link, QWidget *parent = 0 );
+	~dPreview();
 
 public slots:
 	void progress( qint64 received, qint64 total );
 	void finished( QNetworkReply *reply );
-	void changed( const QString &file );
-	void clicked();
-
-protected:
-	void keyPressEvent( QKeyEvent *event );
 
 private:
-	void load( const QByteArray &arr, const QString &type, const QString &filename );
+	Ui::dPreviewClass ui;
 
-	Ui::dUploadClass ui;
-
-	dPreview *m_preview;
-
-	dropArea *droparea;
 	QNetworkAccessManager *m_netman;
-	QString m_userlogin;
-	QString m_link;
-	QString m_filename;
 };
 
-#endif // DUPLOAD_H
+#endif // DPREVIEW_H
