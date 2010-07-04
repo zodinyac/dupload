@@ -13,35 +13,50 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DEXTERNAL_H
-#define DEXTERNAL_H
+#ifndef DGLOBALHOTKEY_H
+#define DGLOBALHOTKEY_H
 
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QTimer>
-#include "dupload.h"
+#include <QObject>
+#include <QAbstractEventDispatcher>
+#include <QKeySequence>
+#include <QMap>
+#include <QHash>
 
-class dUpload;
+#if defined( Q_WS_WIN )
+	#include <windows.h>
+#elif defined( Q_WS_X11 )
+	#include <QX11Info>
+	#include <X11/Xlib.h>
+#elif defined( Q_WS_MAC )
+	#include <Carbon/Carbon.h>
+#endif
 
-class dExternal : public QObject
+class dGlobalHotKey : public QObject
 {
 	Q_OBJECT
 
 public:
-	dExternal( dUpload *d );
-	~dExternal();
+	dGlobalHotKey();
+	~dGlobalHotKey();
 
-	static dExternal *instance( dUpload *d );
+	static bool eventFilter( void *e );
+	static dGlobalHotKey *instance();
 
-public slots:
-	void finished( QNetworkReply *reply );
-	void timerShot();
+	bool shortcut( const QString &s, bool a = true );
+	quint32 id( const QString &s );
+
+	#if defined( Q_WS_X11 )
+		bool error;
+	#endif
+
+signals:
+	void hotKeyPressed( quint32 k );
 
 private:
-	void get( const QString &w, const QString &p = "" );
-	dUpload *m_dupload;
+	void native( const QString &s, quint32 &k, quint32 &m );
 
-	QNetworkAccessManager *m_netman;
+	quint32 nativeModifiers( Qt::KeyboardModifiers m );
+	quint32 nativeKeycode( Qt::Key k );
 };
 
-#endif // DEXTERNAL_H
+#endif // DGLOBALHOTKEY_H

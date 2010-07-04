@@ -4,24 +4,25 @@
 
 
 #Header files
-HEADERS += ./dpreview.h \
+HEADERS += ./dexternal.h \
+    ./dpreview.h \
     ./droparea.h \
+    ./dtaskbar.h \
+    ./dtrayicon.h \
     ./dupload.h \
     ./qtwin.h \
-    ./dtrayicon.h \
-    ./dtaskbar.h \
-    ./resource.h \
-    ./dexternal.h
+    ./dglobalhotkey.h
 
 #Source files
-SOURCES += ./dpreview.cpp \
+SOURCES += ./dexternal.cpp \
+    ./dpreview.cpp \
     ./droparea.cpp \
+    ./dtaskbar.cpp \
+    ./dtrayicon.cpp \
     ./dupload.cpp \
     ./main.cpp \
     ./qtwin.cpp \
-    ./dtrayicon.cpp \
-    ./dtaskbar.cpp \
-    ./dexternal.cpp
+    ./dglobalhotkey.cpp
 
 #Forms
 FORMS += ./dpreview.ui \

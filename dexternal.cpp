@@ -20,6 +20,8 @@ dExternal::dExternal( dUpload *d ) : m_dupload( d )
 	m_netman = new QNetworkAccessManager();
 	connect( m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
 
+	timerShot();
+
 	get( "hello.php" );
 }
 
@@ -59,7 +61,21 @@ void dExternal::finished( QNetworkReply *reply )
 			r.remove( 0, 2 );
 			QMessageBox::warning( m_dupload, "", r );
 		}
+		else if ( r.startsWith( "N:" ) )
+		{
+			r.remove( 0, 2 );
+			r.replace( "|", "\n" );
+			if ( r != "0" )
+				m_dupload->notify( r );
+
+			QTimer::singleShot( 5 * 60 * 1000, this, SLOT( timerShot() ) ); // 5 mins
+		}
 	}
 
 	reply->deleteLater();
+}
+
+void dExternal::timerShot()
+{
+	get( "new.php" );
 }

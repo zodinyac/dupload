@@ -15,6 +15,10 @@
 
 #include "dtrayicon.h"
 
+#if defined ( Q_WS_MAC )
+	void qt_mac_set_dock_menu( QMenu *menu );
+#endif
+
 dTrayIcon::dTrayIcon( dUpload *d ) : m_dupload( d )
 {
 	connect( this, SIGNAL( activated( QSystemTrayIcon::ActivationReason ) ), this, SLOT( activated( QSystemTrayIcon::ActivationReason ) ) );
@@ -23,6 +27,14 @@ dTrayIcon::dTrayIcon( dUpload *d ) : m_dupload( d )
 
 	m_menu.addAction( m_dupload->windowIcon(), "Send as JPG" )->setData( 0 );
 	m_menu.addAction( m_dupload->windowIcon(), "Send as PNG" )->setData( 1 );
+
+#if defined ( Q_WS_MAC )
+	m_menu.addSeparator();
+	m_menu.addAction( m_dupload->windowIcon(), "Show / Hide" )->setData( 2 );
+
+	qt_mac_set_dock_menu( &m_menu );
+#endif
+
 	setContextMenu( &m_menu );
 
 	setIcon( m_dupload->windowIcon() );
@@ -41,10 +53,7 @@ void dTrayIcon::activated( QSystemTrayIcon::ActivationReason r )
 		if ( m_dupload->isVisible() )
 			m_dupload->hide();
 		else
-		{
 			m_dupload->show();
-			m_dupload->activateWindow();
-		}
 	}
 }
 
@@ -62,15 +71,22 @@ void dTrayIcon::message( const QString &s, int type )
 	if ( type == 0 )
 	{
 		m_link = s;
-		showMessage( "Screenshot was successfully loaded", "Click here for copy link to clipboard\n" + m_link );
+		showMessage( "Screenshot was successfully uploaded", "Click here for copy link to clipboard\n" + m_link );
 	}
 	else if ( type == 1 && !m_dupload->isVisible() )
 		showMessage( "Loading...", s, QSystemTrayIcon::NoIcon );
 	else if ( type == 2 )
 		showMessage( "Error", s, QSystemTrayIcon::Critical );
+	else if ( type == 3 )
+		showMessage( "Information", s, QSystemTrayIcon::Information );
 }
 
 void dTrayIcon::menuTriggered( QAction *a )
 {
+#if defined ( Q_WS_MAC )
+	if ( a->data().toInt() == 2 )
+		activated( QSystemTrayIcon::DoubleClick );
+#endif
+
 	m_dupload->sendFromClipboard( a->data().toInt() );
 }

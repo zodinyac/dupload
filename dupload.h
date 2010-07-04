@@ -29,6 +29,7 @@
 #include "dtrayicon.h"
 #include "dtaskbar.h"
 #include "dexternal.h"
+#include "dglobalhotkey.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
@@ -48,14 +49,20 @@ public:
 	dUpload( const QString &file, QWidget *parent = 0 );
 	~dUpload();
 
+	void show();
+	void show( Qt::WindowFlags flags );
+
 	void sendFromClipboard( int type = 0 );
 	const QString &getUserLogin() { return m_userlogin; }
+
+	void notify( const QString &m );
 
 public slots:
 	void progress( qint64 received, qint64 total );
 	void finished( QNetworkReply *reply );
 	void changed( const QString &file );
 	void clicked();
+	void hotKeyPressed( quint32 k );
 
 protected:
 	void closeEvent( QCloseEvent *event );

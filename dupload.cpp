@@ -34,7 +34,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	m_trayicon = new dTrayIcon( this );
 
-#if defined( Q_OS_WIN )
+#if defined( Q_WS_WIN )
 	TCHAR winUserName[UNLEN + 1];
 	DWORD winUserNameSize = sizeof( winUserName );
 	GetUserName( winUserName, &winUserNameSize );
@@ -43,7 +43,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	#else
 		m_userlogin = QString::fromLocal8Bit( winUserName );
 	#endif
-#elif defined( Q_OS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
+#elif defined( Q_WS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
 	m_userlogin = QString( getpwuid( geteuid() )->pw_name );
 #else
 	m_userlogin = "unknown";
@@ -51,12 +51,55 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	dExternal::instance( this );
 
+	dGlobalHotKey::instance()->shortcut( "Alt+B" );
+	dGlobalHotKey::instance()->shortcut( "Alt+N" );
+	dGlobalHotKey::instance()->shortcut( "Alt+V" );
+	dGlobalHotKey::instance()->shortcut( "Alt+S" );
+	connect( dGlobalHotKey::instance(), SIGNAL( hotKeyPressed( quint32 ) ), this, SLOT( hotKeyPressed( quint32 ) ) );
+
 	if ( QFileInfo( file ).isFile() )
 		changed( file );
 }
 
 dUpload::~dUpload()
 {
+}
+
+void dUpload::notify( const QString &m )
+{
+	if ( m_trayicon )
+		m_trayicon->message( m, 3 );
+}
+
+void dUpload::show()
+{
+	setVisible( true );
+
+	#if defined( Q_WS_X11 )
+		XClientMessageEvent xev;
+		xev.type = ClientMessage;
+		xev.window = winId();
+		xev.message_type = XInternAtom( QX11Info::display(), "_NET_ACTIVE_WINDOW", False );
+		xev.format = 32;
+		xev.data.l[0] = 2;
+		xev.data.l[1] = QX11Info::appUserTime();
+
+		XSendEvent( QX11Info::display(), QX11Info::appRootWindow(), False, ( SubstructureNotifyMask | SubstructureRedirectMask ), ( XEvent * ) &xev );
+	#else
+		activateWindow();
+	#endif
+
+	#if defined( Q_WS_MAC )
+		raise();
+	#endif
+}
+
+void dUpload::show( Qt::WindowFlags flags )
+{
+	setWindowFlags( flags );
+	if ( QtWin::isCompositionEnabled() )
+		QtWin::extendFrameIntoClientArea( this );
+	show();
 }
 
 void dUpload::changed( const QString &file )
@@ -111,6 +154,12 @@ void dUpload::sendFromClipboard( int type )
 	if ( droparea->isLocked() )
 		return;
 
+	if ( QApplication::clipboard()->mimeData()->hasUrls() )
+	{
+		changed( QApplication::clipboard()->mimeData()->urls()[0].toLocalFile() );
+		return;
+	}
+
 	QByteArray arr;
 	QBuffer buffer( &arr );
 	buffer.open( QIODevice::WriteOnly );
@@ -149,12 +198,12 @@ void dUpload::finished( QNetworkReply *reply )
 	droparea->lock( false );
 	droparea->setVisible( true );
 	ui.progress->setVisible( false );
-	if( r.startsWith( "E:" ) )
+	if ( r.startsWith( "E:" ) )
 	{
 		droparea->settext( r );
 		m_trayicon->message( r, 2 );
 	}
-	else
+	else if ( !r.isEmpty() )
 	{
 		m_filename = r;
 		m_link = "http://i.deltaz.org/" + m_filename;
@@ -163,6 +212,11 @@ void dUpload::finished( QNetworkReply *reply )
 		droparea->settext( "OK" );
 		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
 		m_trayicon->message( m_link );
+	}
+	else
+	{
+		droparea->settext( "E:0" );
+		m_trayicon->message( "E:0", 2 );
 	}
 
 	reply->deleteLater();
@@ -181,10 +235,10 @@ void dUpload::clicked()
 	}
 }
 
-void dUpload::closeEvent( QCloseEvent *event )
+void dUpload::closeEvent( QCloseEvent * /*event*/ )
 {
 	delete m_netman;
-	m_trayicon->deleteLater();
+	delete m_trayicon;
 #if defined( DTASKBARACTIVE )
 	delete dTaskBar::instance();
 #endif // DTASKBARACTIVE
@@ -192,17 +246,71 @@ void dUpload::closeEvent( QCloseEvent *event )
 
 void dUpload::keyPressEvent( QKeyEvent *event )
 {
-	if ( event->nativeVirtualKey() == 84 || event->nativeVirtualKey() == 80 )
+	#if defined( Q_WS_WIN )
+		const quint32 key = event->nativeScanCode();
+
+		const quint32 key_t = 20;
+		const quint32 key_p = 25;
+		const quint32 key_h = 35;
+		const quint32 key_b = 48;
+		const quint32 key_n = 49;
+		const quint32 key_w = 17;
+	#elif defined( Q_WS_X11 )
+		const quint32 key = event->nativeScanCode();
+
+		const quint32 key_t = 28;
+		const quint32 key_p = 33;
+		const quint32 key_h = 43;
+		const quint32 key_b = 56;
+		const quint32 key_n = 57;
+		const quint32 key_w = 25;
+	#elif defined( Q_WS_MAC )
+		const quint32 key = event->nativeVirtualKey();
+
+		const quint32 key_t = 17;
+		const quint32 key_p = 35;
+		const quint32 key_h = 4;
+		const quint32 key_b = 11;
+		const quint32 key_n = 45;
+		const quint32 key_w = 13;
+	#endif
+
+	switch ( key )
 	{
-		if ( !m_filename.isEmpty() )
-			m_preview = new dPreview( m_filename );
+		case key_t:
+		case key_p:
+			if ( !m_filename.isEmpty() )
+				m_preview = new dPreview( m_filename );
+			break;
+
+		case key_h:
+			hide();
+			break;
+
+		case key_b:
+			sendFromClipboard();
+			break;
+
+		case key_n:
+			sendFromClipboard( 1 );
+			break;
+
+		case key_w:
+			show( windowFlags() ^ Qt::WindowStaysOnTopHint );
+			break;
 	}
-	else if ( event->nativeVirtualKey() == 72 )
-		hide();
-	else if ( event->nativeVirtualKey() == 66 )
+}
+
+void dUpload::hotKeyPressed( quint32 k )
+{
+	if ( k == dGlobalHotKey::instance()->id( "Alt+B" ) )
 		sendFromClipboard();
-	else if ( event->nativeVirtualKey() == 78 )
+	else if ( k == dGlobalHotKey::instance()->id( "Alt+N" ) )
 		sendFromClipboard( 1 );
+	else if ( k == dGlobalHotKey::instance()->id( "Alt+V" ) )
+		show();
+	else if ( k == dGlobalHotKey::instance()->id( "Alt+S" ) )
+		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
 }
 
 void dUpload::mousePressEvent( QMouseEvent *event )
