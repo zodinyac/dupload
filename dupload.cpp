@@ -15,7 +15,7 @@
 
 #include "dupload.h"
 
-dUpload::dUpload( QWidget *parent) : QWidget( parent )
+dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 {
 	ui.setupUi( this );
 
@@ -23,6 +23,7 @@ dUpload::dUpload( QWidget *parent) : QWidget( parent )
 
 	droparea = new dropArea();
 	connect( droparea, SIGNAL( changed( const QString & ) ), this, SLOT( changed( const QString & ) ) );
+	connect( droparea, SIGNAL( clicked() ), this, SLOT( clicked() ) );
 	ui.layout->addWidget( droparea, 0, 0 );
 
 	m_netman = new QNetworkAccessManager();
@@ -40,6 +41,9 @@ dUpload::dUpload( QWidget *parent) : QWidget( parent )
 #else
 	m_userlogin = "non windows user";
 #endif
+
+	if ( QFileInfo( file ).isFile() )
+		changed( file );
 }
 
 dUpload::~dUpload()
@@ -101,9 +105,23 @@ void dUpload::finished( QNetworkReply *reply )
 		droparea->settext( r );
 	else
 	{
-		QApplication::clipboard()->setText( "http://i.deltaz.ru/" + r );
+		m_link = "http://i.deltaz.ru/" + r;
+		QApplication::clipboard()->setText( m_link );
 		droparea->settext( "OK" );
+		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
 	}
 
 	reply->deleteLater();
+}
+
+void dUpload::clicked()
+{
+	if ( !m_link.isEmpty() )
+	{
+		QApplication::clipboard()->setText( m_link );
+		droparea->settext( "drop\nhere" );
+		droparea->setToolTip( "" );
+
+		m_link.clear();
+	}
 }

@@ -74,3 +74,8 @@ void dropArea::dropEvent( QDropEvent *event )
 	emit changed( event->mimeData()->urls().at(0).toLocalFile() );
 	event->acceptProposedAction();
 }
+
+void dropArea::mousePressEvent( QMouseEvent *event )
+{
+	emit clicked();
+}

@@ -32,12 +32,14 @@ public:
 
 signals:
 	void changed( const QString &fileName );
+	void clicked();
 
 protected:
 	void dragEnterEvent( QDragEnterEvent *event );
 	void dragLeaveEvent( QDragLeaveEvent *event );
 	void dragMoveEvent( QDragMoveEvent *event );
 	void dropEvent( QDropEvent *event );
+	void mousePressEvent( QMouseEvent *event );
 
 private:
 	QLabel *label;

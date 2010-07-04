@@ -14,12 +14,16 @@
 *****************************************************************************/
 
 #include "dupload.h"
-#include <QtGui/QApplication>
+#include <QApplication>
 
-int main(int argc, char *argv[])
+int main( int argc, char *argv[] )
 {
-	QApplication a(argc, argv);
-	dUpload w;
+	QString file;
+	if ( argc >= 2 )
+		file = argv[1];
+
+	QApplication a( argc, argv );
+	dUpload w( file );
 	w.show();
 	return a.exec();
 }

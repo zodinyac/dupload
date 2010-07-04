@@ -34,13 +34,14 @@ class dUpload : public QWidget
 	Q_OBJECT
 
 public:
-	dUpload( QWidget *parent = 0 );
+	dUpload( const QString &file, QWidget *parent = 0 );
 	~dUpload();
 
 public slots:
 	void progress( qint64 received, qint64 total );
 	void finished( QNetworkReply *reply );
 	void changed( const QString &file );
+	void clicked();
 
 private:
 	Ui::dUploadClass ui;
@@ -48,6 +49,7 @@ private:
 	dropArea *droparea;
 	QNetworkAccessManager *m_netman;
 	QString m_userlogin;
+	QString m_link;
 };
 
 #endif // DUPLOAD_H
