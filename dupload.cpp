@@ -19,6 +19,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 {
 	ui.setupUi( this );
 	ui.progress->setVisible( false );
+	move( qApp->desktop()->geometry().center() - rect().center() );
 
 	droparea = new dropArea();
 	connect( droparea, SIGNAL( changed( const QString & ) ), this, SLOT( changed( const QString & ) ) );
@@ -28,17 +29,19 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	m_netman = new QNetworkAccessManager();
 	connect( m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
 
-#ifdef Q_OS_WIN
+#if defined( Q_OS_WIN )
 	TCHAR winUserName[UNLEN + 1];
 	DWORD winUserNameSize = sizeof( winUserName );
 	GetUserName( winUserName, &winUserNameSize );
-	#ifdef UNICODE
+	#if defined( UNICODE )
 		m_userlogin = QString::fromUtf16( winUserName );
 	#else
 		m_userlogin = QString::fromLocal8Bit( winUserName );
 	#endif
+#elif defined( Q_OS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
+	m_userlogin = QString( getpwuid( geteuid() )->pw_name );
 #else
-	m_userlogin = "non windows user";
+	m_userlogin = "unknown";
 #endif
 
 	if ( QFileInfo( file ).isFile() )
@@ -73,7 +76,7 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	ui.progress->setVisible( true );
 
 	QByteArray data;
-	QNetworkRequest request( QUrl( "http://i.deltaz.ru/upload.php" ) );
+	QNetworkRequest request( QUrl( "http://i.deltaz.org/upload.php" ) );
 
 	QString author = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"author\"\r\n\r\n" + m_userlogin + "\r\n";
 	QString begin = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"image\"; filename=\"" + filename + "\"\r\nContent-Type: image/" + type + "\r\n\r\n";
@@ -82,7 +85,6 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	data.append( author.toUtf8() );
 	data.append( begin.toUtf8() );
 	data.append( arr );
-
 	data.append( end.toUtf8() );
 
 	request.setRawHeader( "User-Agent", QString( "iDelta" ).toUtf8() );
@@ -112,7 +114,7 @@ void dUpload::finished( QNetworkReply *reply )
 	else
 	{
 		m_filename = r;
-		m_link = "http://i.deltaz.ru/" + m_filename;
+		m_link = "http://i.deltaz.org/" + m_filename;
 
 		QApplication::clipboard()->setText( m_link );
 		droparea->settext( "OK" );
@@ -137,7 +139,7 @@ void dUpload::clicked()
 
 void dUpload::keyPressEvent( QKeyEvent *event )
 {
-	if ( event->key() == Qt::Key_T || event->key() ==  Qt::Key_P )
+	if ( event->key() == Qt::Key_T || event->key() == Qt::Key_P )
 	{
 		if ( !m_filename.isEmpty() )
 			m_preview = new dPreview( m_filename );
@@ -148,8 +150,8 @@ void dUpload::keyPressEvent( QKeyEvent *event )
 		QBuffer buffer( &arr );
 		buffer.open( QIODevice::WriteOnly );
 
-		QApplication::clipboard()->image().save( &buffer, "JPG" );
-		load( arr, "jpeg", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".jpeg" );
+		QApplication::clipboard()->image().save( &buffer, "JPEG" );
+		load( arr, "jpeg", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".jpg" );
 	}
 	else if ( event->key() == Qt::Key_N )
 	{
@@ -159,5 +161,19 @@ void dUpload::keyPressEvent( QKeyEvent *event )
 
 		QApplication::clipboard()->image().save( &buffer, "PNG" );
 		load( arr, "png", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".png" );
+	}
+}
+
+void dUpload::mousePressEvent( QMouseEvent *event )
+{
+	if( event->button() == Qt::LeftButton )
+		m_drag_pos = event->globalPos() - frameGeometry().topLeft();
+}
+
+void dUpload::mouseMoveEvent( QMouseEvent *event )
+{
+	if( event->buttons() & Qt::LeftButton )
+	{
+		move( event->globalPos() - m_drag_pos );
 	}
 }

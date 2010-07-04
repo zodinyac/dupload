@@ -320,6 +320,10 @@
 				RelativePath=".\main.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\qtwin.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -469,6 +473,10 @@
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\qtwin.h"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -736,6 +744,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\dUpload.ico"
+			>
+		</File>
 		<File
 			RelativePath=".\dUpload.rc"
 			>

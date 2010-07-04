@@ -75,7 +75,7 @@ void dropArea::dropEvent( QDropEvent *event )
 	event->acceptProposedAction();
 }
 
-void dropArea::mousePressEvent( QMouseEvent *event )
+void dropArea::mousePressEvent( QMouseEvent * /*event*/ )
 {
 	emit clicked();
 }

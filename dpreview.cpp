@@ -25,7 +25,7 @@ dPreview::dPreview( const QString &link, QWidget *parent ) : QDialog( parent )
 	m_netman = new QNetworkAccessManager();
 	connect( m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
 
-	QNetworkReply* netr = m_netman->get( QNetworkRequest( QUrl( "http://i.deltaz.ru/t_" + link ) ) );
+	QNetworkReply* netr = m_netman->get( QNetworkRequest( QUrl( "http://i.deltaz.org/t_" + link ) ) );
 	connect( netr, SIGNAL( downloadProgress( qint64, qint64 ) ), this, SLOT( progress( qint64, qint64 ) ) );
 
 	show();
