@@ -328,8 +328,8 @@ void dUpload::keyPressEvent( QKeyEvent *event )
 	}
 	else if ( key == nativeKeycode( 'D' ) )
 	{
-		setUserlogin();
 		setPasskey();
+		setUserlogin();
 		notify( "You're logged out" );
 	}
 	else if ( key == nativeKeycode( 'L' ) )
