@@ -52,7 +52,11 @@ dHighlighter::~dHighlighter()
 
 void dHighlighter::keyPressEvent( QKeyEvent *event )
 {
+#if defined( Q_WS_WIN )
 	quint32 key = event->nativeVirtualKey();
+#elif defined( Q_WS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
+	quint32 key = event->nativeScanCode();
+#endif
 
 	if ( key == m_dupload->nativeKeycode( 'B' ) )
 	{
