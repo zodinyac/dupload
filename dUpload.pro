@@ -1,7 +1,7 @@
 TEMPLATE = app
 TARGET = dUpload
 DESTDIR = ./
-QT += network
+QT += network webkit
 CONFIG += release uic resources
 DEFINES += QT_NETWORK_LIB
 INCLUDEPATH += .
