@@ -5,16 +5,20 @@
 
 #Header files
 HEADERS += ./dexternal.h \
+    ./dglobalhotkey.h \
+    ./dlasts.h \
     ./dpreview.h \
     ./droparea.h \
     ./dtaskbar.h \
     ./dtrayicon.h \
     ./dupload.h \
     ./qtwin.h \
-    ./dglobalhotkey.h
+    ./dhighlighter.h
 
 #Source files
 SOURCES += ./dexternal.cpp \
+    ./dglobalhotkey.cpp \
+    ./dlasts.cpp \
     ./dpreview.cpp \
     ./droparea.cpp \
     ./dtaskbar.cpp \
@@ -22,11 +26,13 @@ SOURCES += ./dexternal.cpp \
     ./dupload.cpp \
     ./main.cpp \
     ./qtwin.cpp \
-    ./dglobalhotkey.cpp
+    ./dhighlighter.cpp
 
 #Forms
-FORMS += ./dpreview.ui \
-    ./dupload.ui
+FORMS += ./dlasts.ui \
+    ./dpreview.ui \
+    ./dupload.ui \
+    ./dhighlighter.ui
 
 #Resource file(s)
 RESOURCES += ./dUpload.qrc
