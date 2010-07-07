@@ -52,9 +52,9 @@ dHighlighter::~dHighlighter()
 
 void dHighlighter::keyPressEvent( QKeyEvent *event )
 {
-#if defined( Q_WS_WIN )
+#if defined( Q_WS_WIN ) || defined( Q_WS_MAC )
 	quint32 key = event->nativeVirtualKey();
-#elif defined( Q_WS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
+#elif defined( Q_WS_X11 )
 	quint32 key = event->nativeScanCode();
 #endif
 
