@@ -30,6 +30,8 @@
 #include "dtaskbar.h"
 #include "dexternal.h"
 #include "dglobalhotkey.h"
+#include "dlasts.h"
+#include "dhighlighter.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
@@ -40,6 +42,7 @@
 #endif
 
 class dTrayIcon;
+class dHighlighter;
 
 class dUpload : public QWidget
 {
@@ -56,6 +59,15 @@ public:
 	const QString &getUserLogin() { return m_userlogin; }
 
 	void notify( const QString &m );
+	void showLasts();
+
+	const QString &userlogin();
+	void setUserlogin( const QString &userlogin = QString() );
+
+	const QString &passkey();
+	void setPasskey( const QString &passkey = QString() );
+
+	quint32 nativeKeycode( QChar key );
 
 public slots:
 	void progress( qint64 received, qint64 total );
@@ -77,7 +89,6 @@ private:
 
 	QPoint m_drag_pos;
 
-	dPreview *m_preview;
 	dTrayIcon *m_trayicon;
 
 	QIcon m_icon;
@@ -85,8 +96,11 @@ private:
 	dropArea *droparea;
 	QNetworkAccessManager *m_netman;
 	QString m_userlogin;
+	QString m_passkey;
 	QString m_link;
 	QString m_filename;
+
+	bool m_logged;
 };
 
 #endif // DUPLOAD_H

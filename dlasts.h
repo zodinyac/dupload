@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,38 +13,32 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DTRAYICON_H
-#define DTRAYICON_H
+#ifndef DLASTS_H
+#define DLASTS_H
 
-#include <QAction>
-#include <QMenu>
-#include <QSystemTrayIcon>
+#include <QClipboard>
+#include <QDialog>
 #include "dupload.h"
+#include "ui_dlasts.h"
 
-class dUpload;
-
-class dTrayIcon : public QSystemTrayIcon
+class dLasts : public QDialog
 {
 	Q_OBJECT
 
 public:
-	dTrayIcon( dUpload *d );
-	~dTrayIcon();
-
-	void message( const QString &s, int type = 0 );
-	void updateToolTip();
+	dLasts( dUpload *d );
+	~dLasts();
 
 public slots:
-	void activated( QSystemTrayIcon::ActivationReason r );
-	void messageClicked();
-	void menuTriggered( QAction *a );
+	void copyLinkToClipboard( const QUrl &url );
+
+protected:
+	bool eventFilter( QObject *o, QEvent *e );
 
 private:
+	Ui::dLastsClass ui;
+
 	dUpload *m_dupload;
-
-	QString m_link;
-
-	QMenu m_menu;
 };
 
-#endif // DTRAYICON_H
+#endif // DLASTS_H

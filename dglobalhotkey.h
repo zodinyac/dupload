@@ -45,6 +45,8 @@ public:
 	bool shortcut( const QString &s, bool a = true );
 	quint32 id( const QString &s );
 
+	void native( const QString &s, quint32 &k, quint32 &m );
+
 	#if defined( Q_WS_X11 )
 		bool error;
 	#endif
@@ -53,8 +55,6 @@ signals:
 	void hotKeyPressed( quint32 k );
 
 private:
-	void native( const QString &s, quint32 &k, quint32 &m );
-
 	quint32 nativeModifiers( Qt::KeyboardModifiers m );
 	quint32 nativeKeycode( Qt::Key k );
 };

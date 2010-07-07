@@ -29,25 +29,14 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	connect( droparea, SIGNAL( clicked() ), this, SLOT( clicked() ) );
 	ui.layout->addWidget( droparea, 0, 0 );
 
+	QNetworkProxyFactory::setUseSystemConfiguration( true );
+
 	m_netman = new QNetworkAccessManager();
 	connect( m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
 
 	m_trayicon = new dTrayIcon( this );
 
-#if defined( Q_WS_WIN )
-	TCHAR winUserName[UNLEN + 1];
-	DWORD winUserNameSize = sizeof( winUserName );
-	GetUserName( winUserName, &winUserNameSize );
-	#if defined( UNICODE )
-		m_userlogin = QString::fromUtf16( winUserName );
-	#else
-		m_userlogin = QString::fromLocal8Bit( winUserName );
-	#endif
-#elif defined( Q_WS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
-	m_userlogin = QString( getpwuid( geteuid() )->pw_name );
-#else
-	m_userlogin = "unknown";
-#endif
+	setUserlogin( QString() );
 
 	dExternal::instance( this );
 
@@ -55,6 +44,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	dGlobalHotKey::instance()->shortcut( "Alt+N" );
 	dGlobalHotKey::instance()->shortcut( "Alt+V" );
 	dGlobalHotKey::instance()->shortcut( "Alt+S" );
+	dGlobalHotKey::instance()->shortcut( "Alt+E" );
 	connect( dGlobalHotKey::instance(), SIGNAL( hotKeyPressed( quint32 ) ), this, SLOT( hotKeyPressed( quint32 ) ) );
 
 	if ( QFileInfo( file ).isFile() )
@@ -67,8 +57,67 @@ dUpload::~dUpload()
 
 void dUpload::notify( const QString &m )
 {
-	if ( m_trayicon )
+	if ( m_trayicon && !isVisible() )
 		m_trayicon->message( m, 3 );
+	else
+		QMessageBox::warning( this, "", m );
+}
+
+void dUpload::showLasts()
+{
+	if ( !m_logged )
+	{
+		notify( "You're not authorized" );
+		return;
+	}
+
+	new dLasts( this );
+}
+
+const QString &dUpload::userlogin()
+{
+	return m_userlogin;
+}
+
+void dUpload::setUserlogin( const QString &userlogin )
+{
+	if ( userlogin.isEmpty() )
+	{
+		m_logged = false;
+
+#if defined( Q_WS_WIN )
+		TCHAR winUserName[UNLEN + 1];
+		DWORD winUserNameSize = sizeof( winUserName );
+		GetUserName( winUserName, &winUserNameSize );
+		#if defined( UNICODE )
+			m_userlogin = QString::fromUtf16( ( ushort * ) winUserName );
+		#else
+			m_userlogin = QString::fromLocal8Bit( winUserName );
+		#endif
+#elif defined( Q_WS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
+		m_userlogin = QTextCodec::codecForLocale()->toUnicode( getpwuid( geteuid() )->pw_name );
+#else
+		m_userlogin = "unknown";
+#endif
+	}
+	else
+	{
+		m_logged = true;
+
+		m_userlogin = userlogin;
+	}
+
+	m_trayicon->updateToolTip();
+}
+
+const QString &dUpload::passkey()
+{
+	return m_passkey;
+}
+
+void dUpload::setPasskey( const QString &passkey )
+{
+	m_passkey = passkey;
 }
 
 void dUpload::show()
@@ -246,58 +295,46 @@ void dUpload::closeEvent( QCloseEvent * /*event*/ )
 
 void dUpload::keyPressEvent( QKeyEvent *event )
 {
-	#if defined( Q_WS_WIN )
-		const quint32 key = event->nativeScanCode();
+	quint32 key = event->nativeVirtualKey();
 
-		const quint32 key_t = 20;
-		const quint32 key_p = 25;
-		const quint32 key_h = 35;
-		const quint32 key_b = 48;
-		const quint32 key_n = 49;
-		const quint32 key_w = 17;
-	#elif defined( Q_WS_X11 )
-		const quint32 key = event->nativeScanCode();
-
-		const quint32 key_t = 28;
-		const quint32 key_p = 33;
-		const quint32 key_h = 43;
-		const quint32 key_b = 56;
-		const quint32 key_n = 57;
-		const quint32 key_w = 25;
-	#elif defined( Q_WS_MAC )
-		const quint32 key = event->nativeVirtualKey();
-
-		const quint32 key_t = 17;
-		const quint32 key_p = 35;
-		const quint32 key_h = 4;
-		const quint32 key_b = 11;
-		const quint32 key_n = 45;
-		const quint32 key_w = 13;
-	#endif
-
-	switch ( key )
+	if ( key == nativeKeycode( 'T' ) || key == nativeKeycode( 'P' ) )
 	{
-		case key_t:
-		case key_p:
-			if ( !m_filename.isEmpty() )
-				m_preview = new dPreview( m_filename );
-			break;
-
-		case key_h:
-			hide();
-			break;
-
-		case key_b:
-			sendFromClipboard();
-			break;
-
-		case key_n:
-			sendFromClipboard( 1 );
-			break;
-
-		case key_w:
-			show( windowFlags() ^ Qt::WindowStaysOnTopHint );
-			break;
+		if ( !m_filename.isEmpty() )
+				new dPreview( m_filename );
+	}
+	else if ( key == nativeKeycode( 'H' ) )
+	{
+		hide();
+	}
+	else if ( key == nativeKeycode( 'B' ) )
+	{
+		sendFromClipboard();
+	}
+	else if ( key == nativeKeycode( 'N' ) )
+	{
+		sendFromClipboard( 1 );
+	}
+	else if ( key == nativeKeycode( 'W' ) )
+	{
+		show( windowFlags() ^ Qt::WindowStaysOnTopHint );
+	}
+	else if ( key == nativeKeycode( 'R' ) )
+	{
+		dExternal::instance( this )->userRegister();
+	}
+	else if ( key == nativeKeycode( 'A' ) )
+	{
+		dExternal::instance( this )->userAuth();
+	}
+	else if ( key == nativeKeycode( 'D' ) )
+	{
+		setUserlogin();
+		setPasskey();
+		notify( "You're logged out" );
+	}
+	else if ( key == nativeKeycode( 'L' ) )
+	{
+		showLasts();
 	}
 }
 
@@ -311,6 +348,8 @@ void dUpload::hotKeyPressed( quint32 k )
 		show();
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+S" ) )
 		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
+	else if ( k == dGlobalHotKey::instance()->id( "Alt+E" ) )
+		new dHighlighter( this );
 }
 
 void dUpload::mousePressEvent( QMouseEvent *event )
@@ -323,4 +362,12 @@ void dUpload::mouseMoveEvent( QMouseEvent *event )
 {
 	if( event->buttons() & Qt::LeftButton )
 		move( event->globalPos() - m_drag_pos );
+}
+
+quint32 dUpload::nativeKeycode( QChar key )
+{
+	quint32 k, m;
+	dGlobalHotKey::instance()->native( key, k, m );
+
+	return k;
 }

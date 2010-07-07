@@ -27,6 +27,7 @@ dTrayIcon::dTrayIcon( dUpload *d ) : m_dupload( d )
 
 	m_menu.addAction( m_dupload->windowIcon(), "Send as JPG" )->setData( 0 );
 	m_menu.addAction( m_dupload->windowIcon(), "Send as PNG" )->setData( 1 );
+	m_menu.addAction( m_dupload->windowIcon(), "Lasts 10 images" )->setData( 3 );
 
 #if defined ( Q_WS_MAC )
 	m_menu.addSeparator();
@@ -81,12 +82,22 @@ void dTrayIcon::message( const QString &s, int type )
 		showMessage( "Information", s, QSystemTrayIcon::Information );
 }
 
+void dTrayIcon::updateToolTip()
+{
+	QString toolTipLogged = ( m_dupload->passkey().isEmpty() ? QString() : "logged in as " );
+	QString toolTip = "You're " + toolTipLogged + m_dupload->userlogin();
+
+	setToolTip( toolTip );
+}
+
 void dTrayIcon::menuTriggered( QAction *a )
 {
 #if defined ( Q_WS_MAC )
 	if ( a->data().toInt() == 2 )
 		activated( QSystemTrayIcon::DoubleClick );
 #endif
-
-	m_dupload->sendFromClipboard( a->data().toInt() );
+	if ( a->data().toInt() == 3 )
+		m_dupload->showLasts();
+	else
+		m_dupload->sendFromClipboard( a->data().toInt() );
 }

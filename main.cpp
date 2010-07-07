@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.ru>
+ *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -18,6 +18,11 @@
 
 int main( int argc, char *argv[] )
 {
+	QTextCodec *codec = QTextCodec::codecForName( "UTF-8" );
+	QTextCodec::setCodecForTr( codec );
+	QTextCodec::setCodecForLocale( codec );
+	QTextCodec::setCodecForCStrings( codec ); 
+
 	QString file;
 	if ( argc >= 2 )
 		file = argv[1];

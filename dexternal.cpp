@@ -23,6 +23,7 @@ dExternal::dExternal( dUpload *d ) : m_dupload( d )
 	timerShot();
 
 	get( "hello.php" );
+	get( "new.php" );
 }
 
 dExternal::~dExternal()
@@ -36,25 +37,43 @@ dExternal *dExternal::instance( dUpload *d )
 	return me;
 }
 
+void dExternal::userRegister()
+{
+	get( "register.php" );
+}
+
 void dExternal::get( const QString &w, const QString &p )
 {
 	m_netman->get( QNetworkRequest ( QUrl( "http://u.deltaz.org/" + w + "?i=" + m_dupload->getUserLogin() + ( p.isEmpty() ? "" : "&" ) + p ) ) );
+}
+
+void dExternal::userAuth()
+{
+	m_passkey = QInputDialog::getText( m_dupload, "Passkey", "Enter your passkey", QLineEdit::Password );
+	if ( m_passkey.isEmpty() )
+		return;
+	
+	get( "auth.php", "v=" + m_passkey );
 }
 
 void dExternal::finished( QNetworkReply *reply )
 {
 	while( reply->bytesAvailable() )
 	{
-		QString r = reply->readLine();
+		QString r = QTextCodec::codecForLocale()->toUnicode( reply->readLine() );
 		r.remove( "\n" );
 
 		if ( r.startsWith( "I:" ) )
 		{
 			if ( r.section( ':', 1, 1 ) == "1" )
 			{
-				QString passkey = QInputDialog::getText( m_dupload, "Passkey", "Enter your new passkey and remember. Length of this is from 5 to 32 symbols." );
+				QString passkey = QInputDialog::getText( m_dupload, "Passkey", "Enter your new passkey and remember. Length of this is from 5 to 32 symbols.", QLineEdit::Password );
 				get( "set.php", "t=1&v=" + passkey );
 			}
+			else if ( r.section( ':', 1, 1 ) == "2" )
+				QMessageBox::information( m_dupload, "", "You're already registered" );
+			else if ( r.section( ':', 1, 1 ) == "3" )
+				QMessageBox::warning( m_dupload, "", "Incorrect passkey" );
 		}
 		else if ( r.startsWith( "M:" ) )
 		{
@@ -69,6 +88,13 @@ void dExternal::finished( QNetworkReply *reply )
 				m_dupload->notify( r );
 
 			QTimer::singleShot( 5 * 60 * 1000, this, SLOT( timerShot() ) ); // 5 mins
+		}
+		else if ( r.startsWith( "U:" ) )
+		{
+			r.remove( 0, 2 );
+			m_dupload->setPasskey( m_passkey );
+			m_dupload->setUserlogin( r );
+			m_dupload->notify( "You're logged in as " + r );
 		}
 	}
 

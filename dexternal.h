@@ -33,6 +33,9 @@ public:
 
 	static dExternal *instance( dUpload *d );
 
+	void userRegister();
+	void userAuth();
+
 public slots:
 	void finished( QNetworkReply *reply );
 	void timerShot();
@@ -42,6 +45,8 @@ private:
 	dUpload *m_dupload;
 
 	QNetworkAccessManager *m_netman;
+
+	QString m_passkey;
 };
 
 #endif // DEXTERNAL_H
