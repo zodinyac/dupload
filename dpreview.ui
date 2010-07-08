@@ -14,9 +14,15 @@
    <string>Preview</string>
   </property>
   <property name="styleSheet">
-   <string>background-color: #FFFFFF</string>
+   <string notr="true">QWidget#dPreviewClass { background-color: #FFFFFF; }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="0">

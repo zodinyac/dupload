@@ -57,13 +57,11 @@ dUpload::~dUpload()
 
 void dUpload::notify( const QString &m )
 {
-	if ( m_trayicon && !isVisible() )
+	if ( m_trayicon )
 		m_trayicon->message( m, 3 );
-	else
-		QMessageBox::warning( this, "", m );
 }
 
-void dUpload::showLasts()
+void dUpload::showLast()
 {
 	if ( !m_logged )
 	{
@@ -71,7 +69,7 @@ void dUpload::showLasts()
 		return;
 	}
 
-	new dLasts( this );
+	new dLast( this );
 }
 
 const QString &dUpload::userlogin()
@@ -338,7 +336,7 @@ void dUpload::keyPressEvent( QKeyEvent *event )
 	}
 	else if ( key == nativeKeycode( 'L' ) )
 	{
-		showLasts();
+		showLast();
 	}
 }
 

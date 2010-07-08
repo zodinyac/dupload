@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dLastsClass</class>
- <widget class="QWidget" name="dLastsClass">
+ <class>dLastClass</class>
+ <widget class="QWidget" name="dLastClass">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,12 +11,15 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Lasts 10 images</string>
-  </property>
-  <property name="styleSheet">
-   <string>background-color: #FFFFFF</string>
+   <string>Last 10 images</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <widget class="QWebView" name="webView"/>
    </item>

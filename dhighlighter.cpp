@@ -21,7 +21,9 @@ dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 	setAttribute( Qt::WA_DeleteOnClose );
 	setAttribute( Qt::WA_QuitOnClose, false );
 
-	m_image = QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage();
+	m_image = QApplication::clipboard()->image();
+	if ( m_image.isNull() )
+		m_image = QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage();
 
 	ui.image->setPixmap( QPixmap::fromImage( m_image ) );
 
@@ -74,7 +76,7 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 
 void dHighlighter::mousePressEvent( QMouseEvent *event )
 {
-	m_lastPos = event->pos() + QPoint( 1, 0 ) + QPoint( ui.scrollArea->horizontalScrollBar()->value(), ui.scrollArea->verticalScrollBar()->value() );
+	m_lastPos = event->pos() + QPoint( 1, 0 );
 	mouseMoveEvent( event );
 }
 
@@ -88,8 +90,8 @@ void dHighlighter::mouseMoveEvent( QMouseEvent *event )
 	painter.setPen( QPen( Qt::red, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 
 	QPoint scrollBarShift( ui.scrollArea->horizontalScrollBar()->value(), ui.scrollArea->verticalScrollBar()->value() );
-	painter.drawLine( m_lastPos, event->pos() + scrollBarShift );
-	m_lastPos = event->pos() + scrollBarShift;
+	painter.drawLine( m_lastPos + scrollBarShift, event->pos() + scrollBarShift );
+	m_lastPos = event->pos();
 
 	ui.image->setPixmap( QPixmap::fromImage( m_image ) );
 }

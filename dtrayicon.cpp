@@ -27,7 +27,7 @@ dTrayIcon::dTrayIcon( dUpload *d ) : m_dupload( d )
 
 	m_menu.addAction( m_dupload->windowIcon(), "Send as JPG" )->setData( 0 );
 	m_menu.addAction( m_dupload->windowIcon(), "Send as PNG" )->setData( 1 );
-	m_menu.addAction( m_dupload->windowIcon(), "Lasts 10 images" )->setData( 3 );
+	m_menu.addAction( m_dupload->windowIcon(), "Last 10 images" )->setData( 3 );
 
 #if defined ( Q_WS_MAC )
 	m_menu.addSeparator();
@@ -97,7 +97,7 @@ void dTrayIcon::menuTriggered( QAction *a )
 		activated( QSystemTrayIcon::DoubleClick );
 #endif
 	if ( a->data().toInt() == 3 )
-		m_dupload->showLasts();
+		m_dupload->showLast();
 	else
 		m_dupload->sendFromClipboard( a->data().toInt() );
 }

@@ -30,7 +30,7 @@
 #include "dtaskbar.h"
 #include "dexternal.h"
 #include "dglobalhotkey.h"
-#include "dlasts.h"
+#include "dlast.h"
 #include "dhighlighter.h"
 
 #if defined( Q_OS_WIN )
@@ -59,7 +59,7 @@ public:
 	const QString &getUserLogin() { return m_userlogin; }
 
 	void notify( const QString &m );
-	void showLasts();
+	void showLast();
 
 	const QString &userlogin();
 	void setUserlogin( const QString &userlogin = QString() );

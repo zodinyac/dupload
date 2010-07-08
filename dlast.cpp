@@ -13,32 +13,35 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DLASTS_H
-#define DLASTS_H
+#include "dlast.h"
 
-#include <QClipboard>
-#include <QDialog>
-#include "dupload.h"
-#include "ui_dlasts.h"
-
-class dLasts : public QDialog
+dLast::dLast( dUpload *d ) : m_dupload( d ), QDialog( d )
 {
-	Q_OBJECT
+	ui.setupUi( this );
+	setAttribute( Qt::WA_DeleteOnClose );
 
-public:
-	dLasts( dUpload *d );
-	~dLasts();
+	ui.webView->installEventFilter( this );
+	ui.webView->page()->setLinkDelegationPolicy( QWebPage::DelegateAllLinks );
+	ui.webView->setUrl( "http://i.deltaz.org/last/" + m_dupload->passkey() );
 
-public slots:
-	void copyLinkToClipboard( const QUrl &url );
+	connect( ui.webView->page(), SIGNAL( linkClicked( const QUrl & ) ), this, SLOT( copyLinkToClipboard( const QUrl & ) ) );
 
-protected:
-	bool eventFilter( QObject *o, QEvent *e );
+	show();
+}
 
-private:
-	Ui::dLastsClass ui;
+dLast::~dLast()
+{
+}
 
-	dUpload *m_dupload;
-};
+void dLast::copyLinkToClipboard( const QUrl &url )
+{
+	QApplication::clipboard()->setText( url.toString() );
+	m_dupload->notify( "Link was successfully copied to clipboard" );
+}
 
-#endif // DLASTS_H
+bool dLast::eventFilter( QObject *o, QEvent *e )
+{
+	if ( e->type() == QEvent::ContextMenu )
+		return true;
+	return QObject::eventFilter( o, e );
+}
