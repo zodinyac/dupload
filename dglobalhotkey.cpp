@@ -105,9 +105,15 @@ bool dGlobalHotKey::shortcut( const QString &s, bool a )
 
 	#if defined( Q_WS_WIN )
 		if ( a )
-			return RegisterHotKey( 0, mods ^ key, mods | MOD_NOREPEAT, key );
+		{
+			quint32 modNoRepeat = ( QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7 ? MOD_NOREPEAT : 0 );
+
+			return RegisterHotKey( 0, mods ^ key, mods | modNoRepeat, key );
+		}
 		else
+		{
 			return UnregisterHotKey( 0, mods ^ key );
+		}
 	#elif defined( Q_WS_X11 )
 		if ( a )
 		{
@@ -391,6 +397,9 @@ quint32 dGlobalHotKey::nativeModifiers( Qt::KeyboardModifiers m )
 		native |= controlKey;
 	if ( m & Qt::KeypadModifier )
 		native |= kEventKeyModifierNumLockMask;
+	// Special case for Qt::Key_Backtab ( stealed from kdelibs. I don't know what does it do )
+	if ( ( m & ~Qt::KeyboardModifierMask ) == Qt::Key_Backtab )
+		mod |= shiftKey;
 
 	return native;
 }
@@ -452,6 +461,32 @@ quint32 dGlobalHotKey::nativeKeycode( Qt::Key k )
 	else
 		ch = k;
 
+#ifdef QT_MAC_USE_COCOA
+        TISInputSourceRef layout = TISCopyCurrentKeyboardLayoutInputSource();
+        if ( !layout )
+            return 0;
+
+		CFDataRef data = static_cast< CFDataRef >( TISGetInputSourceProperty( layout, kTISPropertyUnicodeKeyLayoutData ) );
+		const UCKeyboardLayout *ucData = data ? reinterpret_cast< const UCKeyboardLayout * >( CFDataGetBytePtr( data ) ) : 0;
+
+		if ( !ucData )
+			return 0;
+
+		//for ( int i = 0; i < 128; i++ )
+		//{
+			UInt32 tmpState = 0;
+			UniChar str[4];
+			UniCharCount actualLength = 0;
+			OSStatus err = UCKeyTranslate( ucData, k, kUCKeyActionDown, 0, LMGetKbdType(), kUCKeyTranslateNoDeadKeysMask, &tmpState, 4, &actualLength, str );
+		//	if ( err == noErr )
+		//	{
+		//		if ( str[0] && str[0] != kFunctionKeyCharCode )
+		//			scancodes.insert(str[0], i);
+		//	}
+			qDebug() << str[0];
+			return str[0];
+		}
+#else
 	KeyboardLayoutRef layout;
 	KeyboardLayoutKind layoutKind;
 	KLGetCurrentKeyboardLayout( &layout );
@@ -516,6 +551,7 @@ quint32 dGlobalHotKey::nativeKeycode( Qt::Key k )
 			}
 		}
 	}
+#endif
 
 	return 0;
 }

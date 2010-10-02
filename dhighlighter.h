@@ -17,6 +17,7 @@
 #define DHIGHLIGHTER_H
 
 #include <QClipboard>
+#include <QPainter>
 #include <QScrollBar>
 #include <QWidget>
 #include "dupload.h"
@@ -40,8 +41,11 @@ private:
 	Ui::dHighlighterClass ui;
 	dUpload *m_dupload;
 
-	QImage m_image;
+	QPixmap m_pixmap;
+	QPainter m_painter;
 	QPoint m_lastPos;
+
+	QStack< QPixmap > m_states;
 };
 
 #endif // DHIGHLIGHTER_H

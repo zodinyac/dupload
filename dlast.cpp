@@ -19,6 +19,7 @@ dLast::dLast( dUpload *d ) : m_dupload( d ), QDialog( d )
 {
 	ui.setupUi( this );
 	setAttribute( Qt::WA_DeleteOnClose );
+	setAttribute( Qt::WA_QuitOnClose, false );
 
 	ui.webView->installEventFilter( this );
 	ui.webView->page()->setLinkDelegationPolicy( QWebPage::DelegateAllLinks );

@@ -69,6 +69,10 @@ public:
 
 	quint32 nativeKeycode( QChar key );
 
+#if defined( Q_WS_WIN )
+	bool winEvent( MSG *message, long *result );
+#endif
+
 public slots:
 	void progress( qint64 received, qint64 total );
 	void finished( QNetworkReply *reply );

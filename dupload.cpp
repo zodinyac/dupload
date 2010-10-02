@@ -134,9 +134,6 @@ void dUpload::show()
 		XSendEvent( QX11Info::display(), QX11Info::appRootWindow(), False, ( SubstructureNotifyMask | SubstructureRedirectMask ), ( XEvent * ) &xev );
 	#else
 		activateWindow();
-	#endif
-
-	#if defined( Q_WS_MAC )
 		raise();
 	#endif
 }
@@ -147,6 +144,15 @@ void dUpload::show( Qt::WindowFlags flags )
 	if ( QtWin::isCompositionEnabled() )
 		QtWin::extendFrameIntoClientArea( this );
 	show();
+}
+
+bool dUpload::winEvent( MSG *message, long *result )
+{
+	if ( message && message->message == WM_DWMCOMPOSITIONCHANGED )
+		if ( QtWin::isCompositionEnabled() )
+			QtWin::extendFrameIntoClientArea( this );
+
+	return QWidget::winEvent( message, result );
 }
 
 void dUpload::changed( const QString &file )
