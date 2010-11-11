@@ -14,6 +14,7 @@
 *****************************************************************************/
 
 #include "dtrayicon.h"
+#include "dgallery.h"
 
 #if defined ( Q_WS_MAC )
 	void qt_mac_set_dock_menu( QMenu *menu );

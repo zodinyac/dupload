@@ -5,6 +5,7 @@
 
 #Header files
 HEADERS += ./dexternal.h \
+    ./dgallery.h \
     ./dglobalhotkey.h \
     ./dhighlighter.h \
     ./dlast.h \
@@ -13,10 +14,12 @@ HEADERS += ./dexternal.h \
     ./dtaskbar.h \
     ./dtrayicon.h \
     ./dupload.h \
-    ./qtwin.h
+    ./qtwin.h \
+    ./resource.h
 
 #Source files
 SOURCES += ./dexternal.cpp \
+    ./dgallery.cpp \
     ./dglobalhotkey.cpp \
     ./dhighlighter.cpp \
     ./dlast.cpp \
@@ -29,7 +32,8 @@ SOURCES += ./dexternal.cpp \
     ./qtwin.cpp
 
 #Forms
-FORMS += ./dhighlighter.ui \
+FORMS += ./dgallery.ui \
+    ./dhighlighter.ui \
     ./dlast.ui \
     ./dpreview.ui \
     ./dupload.ui

@@ -43,6 +43,7 @@
 
 class dTrayIcon;
 class dHighlighter;
+class dropArea;
 
 class dUpload : public QWidget
 {
@@ -55,8 +56,10 @@ public:
 	void show();
 	void show( Qt::WindowFlags flags );
 
-	void sendFromClipboard( int type = 0 );
+	void sendFromClipboard( int type = 0, const QString &gallery = QString() );
 	const QString &getUserLogin() { return m_userlogin; }
+
+	bool authorized();
 
 	void notify( const QString &m );
 	void showLast();
@@ -67,16 +70,21 @@ public:
 	const QString &passkey();
 	void setPasskey( const QString &passkey = QString() );
 
+	void setLink( const QString &link = QString() );
+
 	quint32 nativeKeycode( QChar key );
 
 #if defined( Q_WS_WIN )
 	bool winEvent( MSG *message, long *result );
 #endif
 
+signals:
+	void finished();
+
 public slots:
 	void progress( qint64 received, qint64 total );
 	void finished( QNetworkReply *reply );
-	void changed( const QString &file );
+	void changed( const QString &file, const QString &gallery = QString() );
 	void clicked();
 	void hotKeyPressed( quint32 k );
 
@@ -87,7 +95,7 @@ protected:
 	void mousePressEvent( QMouseEvent* event );
 	
 private:
-	void load( const QByteArray &arr, const QString &type, const QString &filename );
+	void load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery = QString() );
 
 	Ui::dUploadClass ui;
 

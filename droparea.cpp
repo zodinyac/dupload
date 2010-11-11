@@ -15,7 +15,7 @@
 
 #include "droparea.h"
 
-dropArea::dropArea( QWidget *parent ) : QLabel( parent )
+dropArea::dropArea( dUpload *d ) : m_dupload( d ), QLabel( d )
 {
     setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     setAlignment( Qt::AlignCenter );
@@ -24,6 +24,8 @@ dropArea::dropArea( QWidget *parent ) : QLabel( parent )
 	locked = false;
 
 	settext( "drop\nhere" );
+
+	connect( m_dupload, SIGNAL( finished() ), this, SLOT( uploadFinished() ) );
 }
 
 void dropArea::lock( bool l )
@@ -57,7 +59,14 @@ void dropArea::dragEnterEvent( QDragEnterEvent *event )
 		if ( !QFileInfo( event->mimeData()->urls().at(0).toLocalFile() ).isFile() )
 			return;
 		else
-			settext( QString::number( QFileInfo( event->mimeData()->urls().at(0).toLocalFile() ).size() ) );
+		{
+			int c = 0;
+
+			foreach( QUrl url, event->mimeData()->urls() )
+				c += QFileInfo( url.toLocalFile() ).size();
+
+			settext( QString::number( c ) );
+		}
 	}
 	event->acceptProposedAction();
 }
@@ -76,7 +85,21 @@ void dropArea::dragMoveEvent( QDragMoveEvent *event )
 void dropArea::dropEvent( QDropEvent *event )
 {
 	settext( "..." );
-	emit changed( event->mimeData()->urls().at(0).toLocalFile() );
+
+	m_urls.clear();
+	m_q = 0;
+	
+	if ( event->mimeData()->urls().size() > 1 && m_dupload->authorized() )
+	{
+		m_urls = event->mimeData()->urls();
+		lock();
+
+		m_gallery = new dGallery( m_dupload );
+		connect( m_gallery, SIGNAL( selected( const QString & ) ), this, SLOT( gallerySelected( const QString & ) ) );
+		connect( m_gallery, SIGNAL( rejected() ), this, SLOT( galleryClosed() ) );
+	}
+	else
+		emit changed( event->mimeData()->urls().at(0).toLocalFile(), "" );
 	event->acceptProposedAction();
 }
 
@@ -84,3 +107,37 @@ void dropArea::mousePressEvent( QMouseEvent * /*event*/ )
 {
 	emit clicked();
 }
+
+void dropArea::gallerySelected( const QString &id )
+{
+	m_gid = id;
+
+	emit changed( m_urls.at( 0 ).toLocalFile(), m_gid );
+}
+
+void dropArea::galleryClosed()
+{
+	lock( false );
+}
+
+void dropArea::uploadFinished()
+{
+	m_q++;
+
+	if ( m_q < m_urls.size() )
+	{
+		emit changed( m_urls.at( m_q ).toLocalFile(), m_gid );
+	}
+	else if ( m_q == m_urls.size() )
+	{
+		QString link = "http://i.deltaz.org/g" + m_gid;
+
+		QApplication::clipboard()->setText( link );
+		settext( "OK" );
+		setToolTip( "Click here for copy link to clipboard\n" + link );
+		m_dupload->notify( "Click here for copy link to clipboard\n" + link );
+		m_dupload->setLink( link );
+	}
+}
+
+

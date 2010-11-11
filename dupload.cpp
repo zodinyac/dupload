@@ -24,8 +24,8 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	m_icon.addFile( ":/dUpload.ico" );
 	setWindowIcon( m_icon );
 
-	droparea = new dropArea();
-	connect( droparea, SIGNAL( changed( const QString & ) ), this, SLOT( changed( const QString & ) ) );
+	droparea = new dropArea( this );
+	connect( droparea, SIGNAL( changed( const QString &, const QString & ) ), this, SLOT( changed( const QString &, const QString & ) ) );
 	connect( droparea, SIGNAL( clicked() ), this, SLOT( clicked() ) );
 	ui.layout->addWidget( droparea, 0, 0 );
 
@@ -70,6 +70,11 @@ void dUpload::showLast()
 	}
 
 	new dLast( this );
+}
+
+bool dUpload::authorized()
+{
+	return m_logged;
 }
 
 const QString &dUpload::userlogin()
@@ -118,6 +123,11 @@ void dUpload::setPasskey( const QString &passkey )
 	m_passkey = passkey;
 }
 
+void dUpload::setLink( const QString &link )
+{
+	m_link = link;
+}
+
 void dUpload::show()
 {
 	setVisible( true );
@@ -155,7 +165,7 @@ bool dUpload::winEvent( MSG *message, long *result )
 	return QWidget::winEvent( message, result );
 }
 
-void dUpload::changed( const QString &file )
+void dUpload::changed( const QString &file, const QString &gallery )
 {
 	QFile f( file );
 	if ( !f.open( QIODevice::ReadOnly ) )
@@ -166,12 +176,12 @@ void dUpload::changed( const QString &file )
 	if ( type == "jpg" )
 		type = "jpeg";
 
-	load( f.readAll(), type, filename );
+	load( f.readAll(), type, filename, gallery );
 
 	f.close();
 }
 
-void dUpload::load( const QByteArray &arr, const QString &type, const QString &filename )
+void dUpload::load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery )
 {
 	droparea->lock();
 	droparea->setVisible( false );
@@ -181,7 +191,17 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	QByteArray data;
 	QNetworkRequest request( QUrl( "http://i.deltaz.org/upload.php" ) );
 
-	QString author = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"author\"\r\n\r\n" + m_userlogin + "\r\n";
+	QString author;
+
+	if ( gallery.isEmpty() )
+	{
+		author = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"author\"\r\n\r\n" + m_userlogin + "\r\n";
+	}
+	else
+	{
+		author = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"p\"\r\n\r\n" + m_passkey + "\r\n";
+		author += "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"gallery\"\r\n\r\n" + gallery + "\r\n";
+	}
 	QString begin = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"image\"; filename=\"" + filename + "\"\r\nContent-Type: image/" + type + "\r\n\r\n";
 	QString end = "\r\n------------TSrVsleyvjLUMocQf0NMuB--\r\n";
 
@@ -202,7 +222,7 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 #endif // DTASKBARACTIVE
 }
 
-void dUpload::sendFromClipboard( int type )
+void dUpload::sendFromClipboard( int type, const QString &gallery )
 {
 	if ( droparea->isLocked() )
 		return;
@@ -265,6 +285,8 @@ void dUpload::finished( QNetworkReply *reply )
 		droparea->settext( "OK" );
 		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
 		m_trayicon->message( m_link );
+
+		emit finished();
 	}
 	else
 	{

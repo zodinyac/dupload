@@ -27,10 +27,6 @@ dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 
 	ui.image->setPixmap( m_pixmap );
 
-	m_painter.setRenderHint( QPainter::Antialiasing );
-	m_painter.setPen( QPen( Qt::red, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-	m_painter.begin( &m_pixmap );
-
 	showMaximized();
 
 	#if defined( Q_WS_X11 )
@@ -75,7 +71,7 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 	}
 	else if ( key == m_dupload->nativeKeycode( 'Z' ) )
 	{
-		if ( !m_states.isEmpty() )
+		if ( !m_states.isEmpty() && m_lastPos == QPoint( -1, -1 ) )
 		{
 			m_pixmap = m_states.pop();
 			ui.image->setPixmap( m_pixmap );
@@ -88,6 +84,10 @@ void dHighlighter::mousePressEvent( QMouseEvent *event )
 	if ( m_states.size() >= 7 )
 		m_states.remove( 0 );
 	m_states.push( m_pixmap );
+
+	m_painter.begin( &m_pixmap );
+	m_painter.setRenderHint( QPainter::Antialiasing );
+	m_painter.setPen( QPen( Qt::red, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 
 	m_lastPos = event->pos() + QPoint( 1, 0 );
 	mouseMoveEvent( event );
@@ -107,5 +107,7 @@ void dHighlighter::mouseMoveEvent( QMouseEvent *event )
 
 void dHighlighter::mouseReleaseEvent( QMouseEvent * /*event*/ )
 {
+	m_painter.end();
+
 	m_lastPos = QPoint( -1, -1 );
 }

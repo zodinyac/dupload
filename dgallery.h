@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,57 +13,48 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DROPAREA_H
-#define DROPAREA_H
+#ifndef DGALLERY_H
+#define DGALLERY_H
 
-#include "dgallery.h"
+#include <QDialog>
 
-#include <QLabel>
-#include <QUrl>
-#include <QFileInfo>
-#include <QDropEvent>
+#include "dupload.h"
+#include "ui_dgallery.h"
 
 class dUpload;
-class dGallery;
 
-class dropArea : public QLabel
+class dGallery : public QDialog
 {
 	Q_OBJECT
 
 public:
-	dropArea( dUpload *d );
-	void lock( bool l = true );
-	void settext( QString text );
-	bool isLocked();
+	dGallery( dUpload *d );
+	~dGallery();
 
 signals:
-	void changed( const QString &fileName, const QString &gid );
-	void clicked();
+	void selected( const QString &id );
 
 private slots:
-	void gallerySelected( const QString &id );
-	void galleryClosed();
-	void uploadFinished();
+	void on_createNew_clicked();
+	void on_useLegacy_clicked();
 
-protected:
-	void dragEnterEvent( QDragEnterEvent *event );
-	void dragLeaveEvent( QDragLeaveEvent *event );
-	void dragMoveEvent( QDragMoveEvent *event );
-	void dropEvent( QDropEvent *event );
-	void mousePressEvent( QMouseEvent *event );
+	void on_createButton_clicked();
+	void on_useButton_clicked();
+
+	void finished( QNetworkReply *reply );
 
 private:
-	QList< QUrl > m_urls;
+	Ui::dGalleryClass ui;
 
-	QLabel *label;
-	bool locked;
+	void setLayoutVisible( const QGridLayout *layout, bool visible = true );
+	void setActiveLayout( const QGridLayout *layout );
 
-	dGallery *m_gallery;
+	QGridLayout *activeLayout;
+
 	dUpload *m_dupload;
 
-	QString m_gid;
+	QNetworkAccessManager *m_netman;
 
-	int m_q;
 };
 
-#endif // DROPAREA_H
+#endif // DGALLERY_H
