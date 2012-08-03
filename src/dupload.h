@@ -33,6 +33,8 @@
 #include "dlast.h"
 #include "dhighlighter.h"
 #include "dwebcam.h"
+#include "dsettings.h"
+#include "dplayermpc.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>

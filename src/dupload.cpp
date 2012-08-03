@@ -38,6 +38,8 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	m_webcam_creating = false;
 
+	new dPlayerMpc( this );
+
 	setUserlogin( QString() );
 
 	dExternal::instance( this );
@@ -48,6 +50,8 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	dGlobalHotKey::instance()->shortcut( "Alt+S" );
 	dGlobalHotKey::instance()->shortcut( "Alt+E" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+W" );
+	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+S" );
+
 	connect( dGlobalHotKey::instance(), SIGNAL( hotKeyPressed( quint32 ) ), this, SLOT( hotKeyPressed( quint32 ) ) );
 
 	if ( QFileInfo( file ).isFile() )
@@ -377,6 +381,10 @@ void dUpload::keyPressEvent( QKeyEvent *event )
 	{
 		showLast();
 	}
+	else if ( key == nativeKeycode( 'S' ) )
+	{
+		dSettings::instance()->show();
+	}
 }
 
 void dUpload::hotKeyPressed( quint32 k )
@@ -403,6 +411,10 @@ void dUpload::hotKeyPressed( quint32 k )
 			m_dwebcam = new dWebCam( this );
 			m_webcam_creating = false;
 		}
+	}
+	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+Alt+S" ) )
+	{
+		dSettings::instance()->show();
 	}
 }
 
