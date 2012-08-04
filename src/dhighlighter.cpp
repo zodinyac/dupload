@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2010 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010, 2012 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -22,6 +22,10 @@ dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 	setAttribute( Qt::WA_QuitOnClose, false );
 
 	m_pixmap = QPixmap::fromImage( QApplication::clipboard()->image() );
+
+	if ( m_pixmap.isNull() && QApplication::clipboard()->mimeData()->hasUrls() )
+		m_pixmap.load( QApplication::clipboard()->mimeData()->urls()[0].toLocalFile() );
+
 	if ( m_pixmap.isNull() )
 		m_pixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
 
