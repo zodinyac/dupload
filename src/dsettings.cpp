@@ -59,9 +59,9 @@ void dSettings::show()
 			settingsUi.browseMpcButton->setEnabled( checked );
 			settingsUi.pathMpcEdit->setEnabled( checked );
 
-			// set path to home if it doesn't exist
+			// set path to snapshotpath from registry (or home) if it doesn't exist
 			if ( settingsUi.pathMpcEdit->text().isEmpty() || !QDir( settingsUi.pathMpcEdit->text() ).exists() )
-				settingsUi.pathMpcEdit->setText( QDir::homePath() );
+				settingsUi.pathMpcEdit->setText( QSettings( "HKEY_CURRENT_USER\\Software\\Gabest\\Media Player Classic\\Settings", QSettings::NativeFormat ).value( "SnapShotPath", QDir::homePath() ).toString() );
 		}
 	);
 
