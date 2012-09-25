@@ -17,7 +17,7 @@
 
 dGlobalHotKey::dGlobalHotKey()
 {
-	QAbstractEventDispatcher::instance()->installNativeEventFilter( dGlobalHotKey::instance() );
+    QAbstractEventDispatcher::instance()->installNativeEventFilter( this );
 }
 
 dGlobalHotKey::~dGlobalHotKey()
