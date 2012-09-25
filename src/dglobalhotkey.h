@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -18,6 +18,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QAbstractEventDispatcher>
+#include <QtCore/QAbstractNativeEventFilter>
 #include <QtGui/QKeySequence>
 #include <QtCore/QMap>
 #include <QtCore/QHash>
@@ -31,7 +32,7 @@
 	#include <Carbon/Carbon.h>
 #endif
 
-class dGlobalHotKey : public QObject
+class dGlobalHotKey : public QObject, public QAbstractNativeEventFilter
 {
 	Q_OBJECT
 
@@ -39,7 +40,7 @@ public:
 	dGlobalHotKey();
 	~dGlobalHotKey();
 
-	static bool eventFilter( void *e );
+	bool nativeEventFilter( const QByteArray &eventType, void *e, long * );
 	static dGlobalHotKey *instance();
 
 	bool shortcut( const QString &s, bool a = true );

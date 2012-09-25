@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -17,7 +17,7 @@
 
 dGlobalHotKey::dGlobalHotKey()
 {
-	QAbstractEventDispatcher::instance()->setEventFilter( eventFilter );
+	QAbstractEventDispatcher::instance()->installNativeEventFilter( dGlobalHotKey::instance() );
 }
 
 dGlobalHotKey::~dGlobalHotKey()
@@ -62,7 +62,7 @@ OSStatus qxt_mac_handle_hot_key( EventHandlerCallRef /* nextHandler */, EventRef
 
 #endif
 
-bool dGlobalHotKey::eventFilter( void *e )
+bool dGlobalHotKey::nativeEventFilter( const QByteArray &, void *e, long * )
 {
 	#if defined( Q_WS_WIN )
 		MSG *m = ( MSG * ) e;
