@@ -67,7 +67,19 @@ void dPlayerMpc::directoryChanged( const QString &dir )
 			delta21.append( dir );
 
 	if ( !delta12.count() && delta21.count() == 1 )
-		m_dupload->changed( dir + "/" + delta21.first() );
+	{
+		auto *timer = new QTimer();
+		timer->setSingleShot( true );
+        
+		connect( timer, &QTimer::timeout, [=]()
+			{
+				m_dupload->changed( dir + "/" + delta21.first() );
+				timer->deleteLater();
+			}
+		);
+
+		timer->start( 1000 );
+	}
 
 	m_files = files;
 }

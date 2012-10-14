@@ -204,7 +204,7 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	ui.progress->setVisible( true );
 
 	QByteArray data;
-	QNetworkRequest request( QUrl( "http://i.deltaz.org/upload.php" ) );
+	QNetworkRequest request( QUrl( "http://vfc.cc/upload.php" ) );
 
 	QString author;
 
@@ -294,12 +294,21 @@ void dUpload::finished( QNetworkReply *reply )
 	else if ( !r.isEmpty() )
 	{
 		m_filename = r;
-		m_link = "http://i.deltaz.org/" + m_filename;
+		m_link = "http://vfc.cc/" + m_filename;
 
 		QApplication::clipboard()->setText( m_link );
 		droparea->settext( "OK" );
 		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
 		m_trayicon->message( m_link );
+
+		QFile last( "./last.txt" );
+		if ( last.exists() && last.open( QIODevice::Append | QIODevice::Text ) )
+		{
+			QTextStream out( &last );
+			out << m_link << endl;
+
+			last.close();
+		}
 
 		emit finished();
 	}

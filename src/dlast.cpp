@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2010 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010, 2012 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -23,7 +23,7 @@ dLast::dLast( dUpload *d ) : m_dupload( d ), QDialog( d )
 
 	ui.webView->installEventFilter( this );
 	ui.webView->page()->setLinkDelegationPolicy( QWebPage::DelegateAllLinks );
-	ui.webView->setUrl( "http://i.deltaz.org/last/" + m_dupload->passkey() );
+	ui.webView->setUrl( "http://vfc.cc/last/" + m_dupload->passkey() );
 
 	connect( ui.webView->page(), SIGNAL( linkClicked( const QUrl & ) ), this, SLOT( copyLinkToClipboard( const QUrl & ) ) );
 
