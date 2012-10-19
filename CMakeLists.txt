@@ -14,6 +14,7 @@ find_package( Qt5OpenGL REQUIRED )
 find_package( Qt5WebKit REQUIRED )
 find_package( Qt5Widgets REQUIRED )
 
+file( GLOB dUpload_INCLUDES "src/*.h" )
 file( GLOB dUpload_SOURCES "src/*.cpp" )
 file( GLOB dUpload_UI "ui/*.ui" )
 
@@ -26,7 +27,7 @@ if( WIN32 )
 #	set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/" )
 endif( WIN32 )
 
-add_executable( dUpload WIN32 MACOSX_BUNDLE ${dUpload_SOURCES} ${dUpload_UI_SOURCES} ${dUpload_RESOURCES} )
+add_executable( dUpload WIN32 MACOSX_BUNDLE ${dUpload_INCLUDES} ${dUpload_SOURCES} ${dUpload_UI_SOURCES} ${dUpload_RESOURCES} )
 
 qt5_use_modules( dUpload Core Gui Multimedia MultimediaWidgets Network WebKit Widgets )
 
