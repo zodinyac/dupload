@@ -49,6 +49,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	dGlobalHotKey::instance()->shortcut( "Alt+V" );
 	dGlobalHotKey::instance()->shortcut( "Alt+S" );
 	dGlobalHotKey::instance()->shortcut( "Alt+E" );
+	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+S" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+W" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+S" );
 
@@ -408,6 +409,17 @@ void dUpload::hotKeyPressed( quint32 k )
 		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+E" ) )
 		new dHighlighter( this );
+	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+S" ) )
+	{
+		if ( m_dareaselector )
+		{
+			m_dareaselector->activateWindow();
+		}
+		else
+		{
+			m_dareaselector = new dAreaSelector( this );
+		}
+	}
 	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+W" ) )
 	{
 		if ( m_dwebcam )
