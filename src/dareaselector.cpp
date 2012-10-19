@@ -25,9 +25,9 @@ dAreaSelector::dAreaSelector( dUpload *d ) : m_dupload( d )
 	m_backgroundPixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
 	m_pixmap = m_backgroundPixmap;
 
-    QPainter painter( &m_backgroundPixmap );
-    painter.setBrush( QBrush( QColor( 0, 0, 0, 85 ), Qt::SolidPattern ) );
-    painter.drawRect( QRect( QPoint( 0, 0 ), m_backgroundPixmap.size() ) );
+	QPainter painter( &m_backgroundPixmap );
+	painter.setBrush( QBrush( QColor( 0, 0, 0, 85 ), Qt::SolidPattern ) );
+	painter.drawRect( QRect( QPoint( 0, 0 ), m_backgroundPixmap.size() ) );
 
 	resize( m_backgroundPixmap.size() );
 
