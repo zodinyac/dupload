@@ -18,6 +18,7 @@
 dPainter::dPainter( QWidget * /*parent*/ )
 {
 	m_currentAction.type = ACTION_NONE;
+	m_currentAction.count = 0;
 	m_opacity = 1.0;
 }
 
@@ -25,9 +26,6 @@ dPainter::~dPainter()
 {
 	while ( m_actions.size() )
 		delete m_actions.pop().data;
-
-	if ( m_currentAction.type != ACTION_NONE )
-		delete m_currentAction.data;
 }
 
 void dPainter::drawPoint( const QPoint &point )
@@ -36,6 +34,7 @@ void dPainter::drawPoint( const QPoint &point )
 	m_currentAction.data = new QPoint( point );
 	m_currentAction.opacity = m_opacity;
 	m_currentAction.pen = m_pen;
+	m_currentAction.count = 1;
 
 	m_actions.push( m_currentAction );
 
@@ -43,21 +42,27 @@ void dPainter::drawPoint( const QPoint &point )
 	QLabel::setPixmap( m_pixmap );
 
 	m_currentAction.type = ACTION_NONE;
+	m_currentAction.count = 0;
 }
 
-void dPainter::drawPath( const QPainterPath &path, bool save )
+void dPainter::drawPath( const QPainterPath &path, bool save, bool end )
 {
 	m_currentAction.type = ACTION_PATH;
-	m_currentAction.data = new QPainterPath( path );
+	m_currentAction.data = ( void * )&path;
 	m_currentAction.opacity = m_opacity;
 	m_currentAction.pen = m_pen;
 
 	if ( save )
 	{
-		m_actions.push( m_currentAction );
-
 		draw( &m_pixmap );
 		QLabel::setPixmap( m_pixmap );
+
+		m_currentAction.data = new QPainterPath( path );
+		m_currentAction.count++;
+		m_actions.push( m_currentAction );
+
+		if ( end )
+			m_currentAction.count = 0;
 
 		m_currentAction.type = ACTION_NONE;
 	}
@@ -103,20 +108,25 @@ void dPainter::undo()
 	if ( !m_actions.size() )
 		return;
 
-	delete m_actions.pop().data;
+	for ( int count = m_actions.last().count; count > 0; count-- )
+		delete m_actions.pop().data;
+
 	m_pixmap = m_pixmap_orig;
 
 	foreach ( m_currentAction, m_actions )
 		draw( &m_pixmap );
 
 	QLabel::setPixmap( m_pixmap );
+
 	m_currentAction.type = ACTION_NONE;
+	m_currentAction.count = 0;
 }
 
 void dPainter::draw( QPaintDevice *device )
 {
 	QPainter painter( device );
 
+	painter.setBrush( Qt::NoBrush );
 	painter.setOpacity( m_currentAction.opacity );
 	painter.setPen( m_currentAction.pen );
 	painter.setRenderHint( QPainter::Antialiasing );

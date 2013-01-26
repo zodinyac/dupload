@@ -29,7 +29,7 @@ public:
 	~dPainter();
 
 	void drawPoint( const QPoint &point );
-	void drawPath( const QPainterPath &path, bool save = false );
+	void drawPath( const QPainterPath &path, bool save = false, bool end = false );
 
 	double opacity();
 	void setOpacity( double opacity );
@@ -60,12 +60,16 @@ private:
 
 		double opacity;
 		QPen pen;
+
+		int count;
 	};
 
 	void draw( QPaintDevice *device );
 
 	QPixmap m_pixmap;
 	QPixmap m_pixmap_orig;
+
+	QVector< QPainterPath > m_paths;
 
 	double m_opacity;
 	QPen m_pen;

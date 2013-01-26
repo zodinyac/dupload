@@ -63,6 +63,9 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 	quint32 key = event->nativeScanCode();
 #endif
 
+	if ( m_lastPos != QPoint( -1, -1 ) )
+		return;
+
 	if ( key == m_dupload->nativeKeycode( 'B' ) )
 	{
 		QApplication::clipboard()->setImage( ui.image->pixmap().toImage() );
@@ -77,10 +80,7 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 	}
 	else if ( key == m_dupload->nativeKeycode( 'Z' ) )
 	{
-		if ( m_lastPos == QPoint( -1, -1 ) )
-		{
-			ui.image->undo();
-		}
+		ui.image->undo();
 	}
 	else if ( key == m_dupload->nativeKeycode( 'C' ) )
 	{
@@ -98,7 +98,7 @@ void dHighlighter::mousePressEvent( QMouseEvent *event )
 	if ( event->button() == Qt::RightButton )
 	{
 		ui.image->setOpacity( 0.3 );
-		ui.image->setPen( QPen( Qt::yellow, 15, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		ui.image->setPen( QPen( Qt::yellow, 20, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 	}
 	else
 	{
@@ -108,6 +108,9 @@ void dHighlighter::mousePressEvent( QMouseEvent *event )
 
 	m_lastPos = event->pos();
 	m_path = QPainterPath( m_lastPos + scrollBarShift() );
+
+	m_pathPrev = QPainterPath();
+	m_pathFlag = PATH_FIRST;
 }
 
 void dHighlighter::mouseMoveEvent( QMouseEvent *event )
@@ -115,7 +118,31 @@ void dHighlighter::mouseMoveEvent( QMouseEvent *event )
 	if( !( event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton ) || m_lastPos == QPoint( -1, -1 ) )
 		return;
 
-	m_path.quadTo( m_lastPos + scrollBarShift(), ( m_lastPos + event->pos() ) / 2 + scrollBarShift() );
+	if ( ui.image->opacity() == 1.0 )
+	{
+		if ( m_pathFlag != PATH_FIRST )
+		{
+			m_pathPrev = m_path;
+			m_pathFlag = PATH_OK;
+		}
+		else
+		{
+			m_pathFlag = PATH_SECOND;
+		}
+
+		if ( m_pathFlag == PATH_OK )
+		{
+			ui.image->drawPath( m_pathPrev, true );
+			m_path = QPainterPath( m_pathPrev.currentPosition() );
+		}
+
+		m_path.quadTo( m_lastPos + scrollBarShift(), ( m_lastPos + event->pos() ) / 2 + scrollBarShift() );
+	}
+	else
+	{
+		m_path.lineTo( event->pos() + scrollBarShift() );
+	}
+	
 	ui.image->drawPath( m_path );
 
 	m_lastPos = event->pos();
@@ -129,7 +156,7 @@ void dHighlighter::mouseReleaseEvent( QMouseEvent * /*event*/ )
 	if ( m_path.isEmpty() )
 		ui.image->drawPoint( m_lastPos );
 	else
-		ui.image->drawPath( m_path, true );
+		ui.image->drawPath( m_path, true, true );
 
 	m_lastPos = QPoint( -1, -1 );
 }

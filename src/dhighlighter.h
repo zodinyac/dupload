@@ -38,12 +38,21 @@ protected:
 	void mouseReleaseEvent( QMouseEvent *event );
 
 private:
+	enum
+	{
+		PATH_FIRST,
+		PATH_SECOND,
+		PATH_OK
+	} m_pathFlag;
+
 	QPoint scrollBarShift();
 
 	Ui::dHighlighterClass ui;
 	dUpload *m_dupload;
 
+	QPainterPath m_pathPrev;
 	QPainterPath m_path;
+
 	QPoint m_lastPos;
 };
 
