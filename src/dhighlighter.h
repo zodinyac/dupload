@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2010 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010, 2012-2013 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -38,14 +38,13 @@ protected:
 	void mouseReleaseEvent( QMouseEvent *event );
 
 private:
+	QPoint scrollBarShift();
+
 	Ui::dHighlighterClass ui;
 	dUpload *m_dupload;
 
-	QPixmap m_pixmap;
-	QPainter m_painter;
+	QPainterPath m_path;
 	QPoint m_lastPos;
-
-	QStack< QPixmap > m_states;
 };
 
 #endif // DHIGHLIGHTER_H

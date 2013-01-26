@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2010, 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010, 2012-2013 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,6 +13,8 @@
  ***************************************************************************
 *****************************************************************************/
 
+#include <QtGui/QPainterPath>
+
 #include "dhighlighter.h"
 
 dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
@@ -21,15 +23,15 @@ dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 	setAttribute( Qt::WA_DeleteOnClose );
 	setAttribute( Qt::WA_QuitOnClose, false );
 
-	m_pixmap = QPixmap::fromImage( QApplication::clipboard()->image() );
+	QPixmap pixmap = QPixmap::fromImage( QApplication::clipboard()->image() );
 
-	if ( m_pixmap.isNull() && QApplication::clipboard()->mimeData()->hasUrls() )
-		m_pixmap.load( QApplication::clipboard()->mimeData()->urls()[0].toLocalFile() );
+	if ( pixmap.isNull() && QApplication::clipboard()->mimeData()->hasUrls() )
+		pixmap.load( QApplication::clipboard()->mimeData()->urls()[0].toLocalFile() );
 
-	if ( m_pixmap.isNull() )
-		m_pixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
+	if ( pixmap.isNull() )
+		pixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
 
-	ui.image->setPixmap( m_pixmap );
+	ui.image->setPixmap( pixmap );
 
 	showMaximized();
 
@@ -63,55 +65,76 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 
 	if ( key == m_dupload->nativeKeycode( 'B' ) )
 	{
-		QApplication::clipboard()->setImage( m_pixmap.toImage() );
+		QApplication::clipboard()->setImage( ui.image->pixmap().toImage() );
 		m_dupload->sendFromClipboard();
 		close();
 	}
 	else if ( key == m_dupload->nativeKeycode( 'N' ) )
 	{
-		QApplication::clipboard()->setImage( m_pixmap.toImage() );
+		QApplication::clipboard()->setImage( ui.image->pixmap().toImage() );
 		m_dupload->sendFromClipboard( 1 );
 		close();
 	}
 	else if ( key == m_dupload->nativeKeycode( 'Z' ) )
 	{
-		if ( !m_states.isEmpty() && m_lastPos == QPoint( -1, -1 ) )
+		if ( m_lastPos == QPoint( -1, -1 ) )
 		{
-			m_pixmap = m_states.pop();
-			ui.image->setPixmap( m_pixmap );
+			ui.image->undo();
 		}
+	}
+	else if ( key == m_dupload->nativeKeycode( 'C' ) )
+	{
+		QApplication::clipboard()->setImage( ui.image->pixmap().toImage() );
+		close();
+	}
+	else if ( event->key() == Qt::Key_Escape )
+	{
+		close();
 	}
 }
 
 void dHighlighter::mousePressEvent( QMouseEvent *event )
 {
-	if ( m_states.size() >= 7 )
-		m_states.remove( 0 );
-	m_states.push( m_pixmap );
+	if ( event->button() == Qt::RightButton )
+	{
+		ui.image->setOpacity( 0.3 );
+		ui.image->setPen( QPen( Qt::yellow, 15, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+	}
+	else
+	{
+		ui.image->setOpacity( 1.0 );
+		ui.image->setPen( QPen( Qt::red, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+	}
 
-	m_painter.begin( &m_pixmap );
-	m_painter.setRenderHint( QPainter::Antialiasing );
-	m_painter.setPen( QPen( Qt::red, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-
-	m_lastPos = event->pos() + QPoint( 1, 0 );
-	mouseMoveEvent( event );
+	m_lastPos = event->pos();
+	m_path = QPainterPath( m_lastPos + scrollBarShift() );
 }
 
 void dHighlighter::mouseMoveEvent( QMouseEvent *event )
 {
-	if( !( event->buttons() & Qt::LeftButton ) || m_lastPos == QPoint( -1, -1 ) )
+	if( !( event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton ) || m_lastPos == QPoint( -1, -1 ) )
 		return;
 
-	QPoint scrollBarShift( ui.scrollArea->horizontalScrollBar()->value(), ui.scrollArea->verticalScrollBar()->value() );
-	m_painter.drawLine( m_lastPos + scrollBarShift, event->pos() + scrollBarShift );
-	m_lastPos = event->pos();
+	m_path.quadTo( m_lastPos + scrollBarShift(), ( m_lastPos + event->pos() ) / 2 + scrollBarShift() );
+	ui.image->drawPath( m_path );
 
-	ui.image->setPixmap( m_pixmap );
+	m_lastPos = event->pos();
 }
 
 void dHighlighter::mouseReleaseEvent( QMouseEvent * /*event*/ )
 {
-	m_painter.end();
+	if ( m_lastPos == QPoint( -1, -1 ) )
+		return;
+
+	if ( m_path.isEmpty() )
+		ui.image->drawPoint( m_lastPos );
+	else
+		ui.image->drawPath( m_path, true );
 
 	m_lastPos = QPoint( -1, -1 );
+}
+
+QPoint dHighlighter::scrollBarShift()
+{
+	return QPoint( ui.scrollArea->horizontalScrollBar()->value(), ui.scrollArea->verticalScrollBar()->value() );
 }
