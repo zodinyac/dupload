@@ -18,7 +18,6 @@
 dPainter::dPainter( QWidget * /*parent*/ )
 {
 	m_currentAction.type = ACTION_NONE;
-
 	m_opacity = 1.0;
 }
 
