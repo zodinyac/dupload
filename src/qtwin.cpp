@@ -10,6 +10,8 @@
 
 #include "qtwin.h"
 #include <QtCore/QLibrary>
+#include <QtCore/QAbstractEventDispatcher>
+#include <QtCore/QAbstractNativeEventFilter>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QWidget>
 #include <QtCore/QList>
@@ -59,13 +61,16 @@ static PtrDwmEnableComposition pDwmEnableComposition = 0;
  * DWM compositing state changes and updates the widget
  * flags correspondingly.
  */
-class WindowNotifier : public QWidget
+class WindowNotifier : public QWidget, public QAbstractNativeEventFilter
 {
 public:
-    WindowNotifier() { winId(); }
+    WindowNotifier() {
+		winId();
+		QAbstractEventDispatcher::instance()->installNativeEventFilter( this );
+	}
     void addWidget(QWidget *widget) { widgets.append(widget); }
     void removeWidget(QWidget *widget) { widgets.removeAll(widget); }
-    bool nativeEvent(QByteArray ba, void *message, long *result);
+    bool nativeEventFilter(const QByteArray &eventType, void *message, long *result);
 
 private:
     QWidgetList widgets;
@@ -208,20 +213,29 @@ WindowNotifier *QtWin::windowNotifier()
 
 
 /* Notify all enabled windows that the DWM state changed */
-bool WindowNotifier::nativeEvent( QByteArray ba, void *message, long *result )
+bool WindowNotifier::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
 {
-	if ( ba == "windows_generic_MSG" )
+	if ( eventType == "windows_generic_MSG" )
 	{
 		if ((MSG*)message && ( (MSG*)message )->message == WM_DWMCOMPOSITIONCHANGED) {
 			bool compositionEnabled = QtWin::isCompositionEnabled();
 			foreach(QWidget * widget, widgets) {
 				if (widget) {
-					widget->setAttribute(Qt::WA_NoSystemBackground, compositionEnabled);
+					if (compositionEnabled)
+					{
+						widget->setAttribute(Qt::WA_TranslucentBackground, true);
+						QtWin::extendFrameIntoClientArea(widget);
+					}
+					else
+					{
+						widget->setAttribute(Qt::WA_NoSystemBackground, false);
+					}
+
+					widget->update();
 				}
-				widget->update();
 			}
 		}
 	}
-    return QWidget::nativeEvent(ba, message, result);
+    return false;
 }
 #endif

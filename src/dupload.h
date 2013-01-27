@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010, 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012-2013 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -80,8 +80,6 @@ public:
 
 	quint32 nativeKeycode( QChar key );
 
-	bool nativeEvent( QByteArray ba, void *message, long *result );
-
 signals:
 	void finished();
 
@@ -100,6 +98,7 @@ protected:
 	void paintEvent( QPaintEvent *event );
 	
 private:
+	void aeroBackground();
 	void load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery = QString() );
 
 	Ui::dUploadClass ui;

@@ -136,8 +136,24 @@ void dUpload::setLink( const QString &link )
 	m_link = link;
 }
 
+void dUpload::aeroBackground()
+{
+	bool compositionEnabled = QtWin::isCompositionEnabled();
+	if ( compositionEnabled )
+	{
+		setAttribute( Qt::WA_TranslucentBackground, true );
+		QtWin::extendFrameIntoClientArea( this );
+	}
+	else
+	{
+		setAttribute( Qt::WA_NoSystemBackground, false );
+	}
+}
+
 void dUpload::show()
 {
+	aeroBackground();
+
 	setVisible( true );
 
 	#if defined( Q_WS_X11 )
@@ -159,26 +175,7 @@ void dUpload::show()
 void dUpload::show( Qt::WindowFlags flags )
 {
 	setWindowFlags( flags );
-
-	if ( QtWin::isCompositionEnabled() )
-	{
-		setAttribute( Qt::WA_TranslucentBackground, true );
-		QtWin::extendFrameIntoClientArea( this );
-	}
-
 	show();
-}
-
-bool dUpload::nativeEvent( QByteArray ba, void *message, long *result )
-{
-	if ( ba == "windows_generic_MSG" )
-	{
-		if ( (MSG*)message && ( (MSG*)message )->message == WM_DWMCOMPOSITIONCHANGED )
-			if ( QtWin::isCompositionEnabled() )
-				QtWin::extendFrameIntoClientArea( this );
-	}
-
-	return QWidget::nativeEvent( ba, message, result );
 }
 
 void dUpload::changed( const QString &file, const QString &gallery )
