@@ -22,12 +22,12 @@ dSettings::dSettings()
 
 dSettings::~dSettings()
 {
+	m_settingsDialog->deleteLater();
 }
 
 dSettings *dSettings::instance()
 {
 	static dSettings *me = new dSettings();
-
 	return me;
 }
 
@@ -38,64 +38,68 @@ void dSettings::show()
 
 	m_shown = true;
 
-	QDialog settingsDialog;
-	Ui::dSettingsClass settingsUi;
-
-	settingsUi.setupUi( &settingsDialog );
+	m_settingsDialog = new QDialog();
+	m_settingsUi.setupUi( m_settingsDialog );
 
 	// dialog
-	settingsDialog.setAttribute( Qt::WA_QuitOnClose, false );
-	settingsDialog.setWindowFlags( settingsDialog.windowFlags() ^ Qt::WindowContextHelpButtonHint );
+	m_settingsDialog->setAttribute( Qt::WA_DeleteOnClose, true );
+	m_settingsDialog->setAttribute( Qt::WA_QuitOnClose, false );
+	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowContextHelpButtonHint );
 
 	// mpc screens path
-	settingsUi.pathMpcEdit->setText( get< QString >( "mpcScreensPath" ) );
+	m_settingsUi.pathMpcEdit->setText( get< QString >( "mpcScreensPath" ) );
 
 	// enable mpc checkbox
-	connect( settingsUi.enableMpcCheckBox, &QCheckBox::toggled, [ this, &settingsUi ]( bool checked )
+	connect( m_settingsUi.enableMpcCheckBox, &QCheckBox::toggled, [ this ]( bool checked )
 		{
 			set( "enableMpc", checked );
 
-			settingsUi.folderMpcLabel->setEnabled( checked );
-			settingsUi.browseMpcButton->setEnabled( checked );
-			settingsUi.pathMpcEdit->setEnabled( checked );
+			m_settingsUi.folderMpcLabel->setEnabled( checked );
+			m_settingsUi.browseMpcButton->setEnabled( checked );
+			m_settingsUi.pathMpcEdit->setEnabled( checked );
 
 			// set path to snapshotpath from registry (or home) if it doesn't exist
-			if ( settingsUi.pathMpcEdit->text().isEmpty() || !QDir( settingsUi.pathMpcEdit->text() ).exists() )
-				settingsUi.pathMpcEdit->setText( QSettings( "HKEY_CURRENT_USER\\Software\\Gabest\\Media Player Classic\\Settings", QSettings::NativeFormat ).value( "SnapShotPath", QDir::homePath() ).toString() );
+			if ( m_settingsUi.pathMpcEdit->text().isEmpty() || !QDir( m_settingsUi.pathMpcEdit->text() ).exists() )
+				m_settingsUi.pathMpcEdit->setText( QSettings( "HKEY_CURRENT_USER\\Software\\Gabest\\Media Player Classic\\Settings", QSettings::NativeFormat ).value( "SnapShotPath", QDir::homePath() ).toString() );
 
-			set( "mpcScreensPath", settingsUi.pathMpcEdit->text() );
+			set( "mpcScreensPath", m_settingsUi.pathMpcEdit->text() );
 		}
 	);
 
-	settingsUi.enableMpcCheckBox->setChecked( get( "enableMpc", false ) );
-	settingsUi.enableMpcCheckBox->toggled( settingsUi.enableMpcCheckBox->isChecked() );
+	m_settingsUi.enableMpcCheckBox->setChecked( get( "enableMpc", false ) );
+	m_settingsUi.enableMpcCheckBox->toggled( m_settingsUi.enableMpcCheckBox->isChecked() );
 
 	// browse mpc button
-	connect( settingsUi.browseMpcButton, &QPushButton::clicked, [ this, &settingsDialog, &settingsUi ]( bool )
+	connect( m_settingsUi.browseMpcButton, &QPushButton::clicked, [ this ]( bool )
 		{
-			QString dir = QFileDialog::getExistingDirectory( &settingsDialog, "Select the mpc screenshots directory", settingsUi.pathMpcEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+			QString dir = QFileDialog::getExistingDirectory( m_settingsDialog, "Select the mpc screenshots directory", m_settingsUi.pathMpcEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
 
-			settingsUi.pathMpcEdit->setText( dir );
+			m_settingsUi.pathMpcEdit->setText( dir );
 			set( "mpcScreensPath", dir );
 		}
 	);
 
+	// highlighter
+	highlighterSettingsLoad();
+
+	// highlighter color choose buttons
+	connect( m_settingsUi.highlighterLeftButton, &QPushButton::clicked, this, &dSettings::highlighterSettingsColor );
+	connect( m_settingsUi.highlighterRightButton, &QPushButton::clicked, this, &dSettings::highlighterSettingsColor );
+
+	// highlighter width boxes
+	connect( m_settingsUi.highlighterLeftWidthBox, static_cast< void ( QDoubleSpinBox::* )( double ) >( &QDoubleSpinBox::valueChanged ), this, &dSettings::highlighterSettingsWidth );
+	connect( m_settingsUi.highlighterRightWidthBox, static_cast< void ( QDoubleSpinBox::* )( double ) >( &QDoubleSpinBox::valueChanged ), this, &dSettings::highlighterSettingsWidth );
+
 	// close button
-	connect( settingsUi.closeButton, &QPushButton::clicked, [ &settingsDialog ]( bool )
+	connect( m_settingsUi.closeButton, &QPushButton::clicked, [ this ]( bool )
 		{
-			settingsDialog.accept();
+			m_settingsDialog->accept();
 		}
 	);
 
-	settingsDialog.exec();
+	m_settingsDialog->exec();
 
 	m_shown = false;
-}
-
-template < class T >
-T dSettings::get( const QString &key, const T &default )
-{
-	return m_settings.value( key, QVariant::fromValue( default ) ).value< T >();
 }
 
 template < class T >
@@ -109,4 +113,50 @@ void dSettings::set( const QString &key, const T &value )
 int dSettings::remove( const QString &key )
 {
 	return m_settings.remove( key );
+}
+
+void dSettings::highlighterSettingsLoad()
+{
+	m_settingsUi.highlighterLeftButton->setStyleSheet( "background-color: " + get< QColor >( "highlighterLeftButtonColor", Qt::red ).name() );
+	m_settingsUi.highlighterRightButton->setStyleSheet( "background-color: " + get< QColor >( "highlighterRightButtonColor", Qt::yellow ).name() );
+
+	m_settingsUi.highlighterLeftOpacityLabel->setText( QString::number( qFloor( get( "highlighterLeftButtonOpacity", 1.0 ) * 255 ) ) );
+	m_settingsUi.highlighterRightOpacityLabel->setText( QString::number( qFloor( get( "highlighterRightButtonOpacity", 0.3 ) * 255 ) ) );
+
+	m_settingsUi.highlighterLeftWidthBox->setValue( get( "highlighterLeftButtonWidth", 4.0 ) );
+	m_settingsUi.highlighterRightWidthBox->setValue( get( "highlighterRightButtonWidth", 20.0 ) );
+}
+
+void dSettings::highlighterSettingsColor( bool /*checked*/ )
+{
+	QPushButton *button = qobject_cast< QPushButton * >( sender() );
+
+	QString name = button->objectName();
+	QString buttonName = ( name == "highlighterLeftButton" ? "left" : "right" );
+	bool left = ( name == "highlighterLeftButton" ? true : false );
+	
+	QColor color = get< QColor >( name + "Color", ( left ? Qt::red : Qt::yellow ) );
+	color.setAlphaF( get< qreal >( name + "Opacity", ( left ? 1.0 : 0.3 ) ) );
+
+	color = QColorDialog::getColor( color, m_settingsDialog, QString( "Choose color for %1 button" ).arg( buttonName ), QColorDialog::ShowAlphaChannel );
+
+	if ( !color.isValid() )
+		return;
+
+	set( name + "Opacity", color.alphaF() );
+
+	color.setAlphaF( 1.0 );
+	set( name + "Color", color );
+
+	highlighterSettingsLoad();
+}
+
+void dSettings::highlighterSettingsWidth( double value )
+{
+	QDoubleSpinBox *box = qobject_cast< QDoubleSpinBox * >( sender() );
+
+	QString name = ( box->objectName() == "highlighterLeftWidthBox" ? "highlighterLeftButtonWidth" : "highlighterRightButtonWidth" );
+	set( name, value );
+
+	highlighterSettingsLoad();
 }

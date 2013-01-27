@@ -20,6 +20,8 @@ dPainter::dPainter( QWidget * /*parent*/ )
 	m_currentAction.type = ACTION_NONE;
 	m_currentAction.count = 0;
 	m_opacity = 1.0;
+
+	m_transparentLayer = new QLabel( this );
 }
 
 dPainter::~dPainter()
@@ -45,31 +47,25 @@ void dPainter::drawPoint( const QPoint &point )
 	m_currentAction.count = 0;
 }
 
-void dPainter::drawPath( const QPainterPath &path, bool save, bool end )
+void dPainter::drawPath( const QPainterPath &path, bool end )
 {
 	m_currentAction.type = ACTION_PATH;
-	m_currentAction.data = ( void * )&path;
+	m_currentAction.data = new QPainterPath( path );
 	m_currentAction.opacity = m_opacity;
 	m_currentAction.pen = m_pen;
+	m_currentAction.count++;
 
-	if ( save )
+	m_actions.push( m_currentAction );
+
+	draw( &m_transparentPixmap );
+
+	if ( end )
 	{
-		draw( &m_pixmap );
-		QLabel::setPixmap( m_pixmap );
-
-		m_currentAction.data = new QPainterPath( path );
-		m_currentAction.count++;
-		m_actions.push( m_currentAction );
-
-		if ( end )
-			m_currentAction.count = 0;
-
-		m_currentAction.type = ACTION_NONE;
+		m_currentAction.count = 0;
+		finalize();
 	}
-	else
-	{
-		update();
-	}
+
+	m_currentAction.type = ACTION_NONE;
 }
 
 double dPainter::opacity()
@@ -101,6 +97,11 @@ void dPainter::setPixmap( const QPixmap &pixmap )
 {
 	m_pixmap = m_pixmap_orig = pixmap;
 	QLabel::setPixmap( m_pixmap );
+
+	m_transparentPixmap = QPixmap( m_pixmap.size() );
+	m_transparentPixmap.fill( Qt::transparent );
+
+	m_transparentLayer->setPixmap( m_transparentPixmap );
 }
 
 void dPainter::undo()
@@ -114,22 +115,32 @@ void dPainter::undo()
 	m_pixmap = m_pixmap_orig;
 
 	foreach ( m_currentAction, m_actions )
-		draw( &m_pixmap );
+	{
+		if ( m_currentAction.count == 1 )
+			finalize();
 
-	QLabel::setPixmap( m_pixmap );
+		draw( &m_transparentPixmap, false );
+	}
+
+	finalize();
 
 	m_currentAction.type = ACTION_NONE;
 	m_currentAction.count = 0;
 }
 
-void dPainter::draw( QPaintDevice *device )
+void dPainter::draw( QPaintDevice *device, bool visible )
 {
 	QPainter painter( device );
 
-	painter.setBrush( Qt::NoBrush );
+	bool transparentPixmap = device == &m_transparentPixmap;
+
+	if ( transparentPixmap )
+		painter.setCompositionMode( QPainter::CompositionMode_Source );
+		
 	painter.setOpacity( m_currentAction.opacity );
 	painter.setPen( m_currentAction.pen );
 	painter.setRenderHint( QPainter::Antialiasing );
+	painter.setRenderHint( QPainter::HighQualityAntialiasing );
 
 	if ( m_currentAction.type == ACTION_POINT )
 	{
@@ -139,14 +150,18 @@ void dPainter::draw( QPaintDevice *device )
 	{
 		painter.drawPath( *( QPainterPath * )m_currentAction.data );
 	}
+
+	if ( transparentPixmap && visible )
+		m_transparentLayer->setPixmap( m_transparentPixmap );
 }
 
-void dPainter::paintEvent( QPaintEvent *event )
+void dPainter::finalize()
 {
-	QLabel::paintEvent( event );
+	QPainter painter( &m_pixmap );
 
-	if ( m_currentAction.type == ACTION_NONE )
-		return;
+	painter.drawPixmap( 0, 0, m_transparentPixmap );
+	QLabel::setPixmap( m_pixmap );
 
-	draw( this );
+	m_transparentPixmap.fill( Qt::transparent );
+	m_transparentLayer->setPixmap( m_transparentPixmap );
 }

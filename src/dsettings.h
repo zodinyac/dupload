@@ -33,7 +33,10 @@ public:
 	void show();
 
 	template < class T >
-	T get( const QString &key, const T &default = T() );
+	inline T get( const QString &key, const T &default = T() )
+	{
+		return m_settings.value( key, QVariant::fromValue( default ) ).value< T >();
+	}
 
 	template < class T >
 	void set( const QString &key, const T &value );
@@ -44,7 +47,14 @@ signals:
 	void settingsChanged();
 
 private:
+	Ui::dSettingsClass m_settingsUi;
+	QDialog *m_settingsDialog;
+
 	dSettings();
+
+	void highlighterSettingsLoad();
+	void highlighterSettingsColor( bool checked = false );
+	void highlighterSettingsWidth( double value );
 
 	QHash< QString, QVariant > m_settings;
 

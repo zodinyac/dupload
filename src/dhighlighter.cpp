@@ -16,6 +16,7 @@
 #include <QtGui/QPainterPath>
 
 #include "dhighlighter.h"
+#include "dsettings.h"
 
 dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 {
@@ -32,6 +33,8 @@ dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 		pixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
 
 	ui.image->setPixmap( pixmap );
+	
+	m_lastPos = QPoint( -1, -1 );
 
 	showMaximized();
 
@@ -95,16 +98,29 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 
 void dHighlighter::mousePressEvent( QMouseEvent *event )
 {
-	if ( event->button() == Qt::RightButton )
+	dSettings *settings = dSettings::instance();
+
+	QColor color;
+	qreal opacity;
+	qreal width;
+
+	if ( event->button() == Qt::LeftButton )
 	{
-		ui.image->setOpacity( 0.3 );
-		ui.image->setPen( QPen( Qt::yellow, 20, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		color = settings->get< QColor >( "highlighterLeftButtonColor", Qt::red );
+		opacity = settings->get( "highlighterLeftButtonOpacity", 1.0 );
+		width = settings->get( "highlighterLeftButtonWidth", 4.0 );
+
+		qDebug() << color.isValid() << color;
 	}
 	else
 	{
-		ui.image->setOpacity( 1.0 );
-		ui.image->setPen( QPen( Qt::red, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		color = settings->get< QColor >( "highlighterRightButtonColor", Qt::yellow );
+		opacity = settings->get< qreal >( "highlighterRightButtonOpacity", 0.3 );
+		width = settings->get( "highlighterRightButtonWidth", 20.0 );
 	}
+
+	ui.image->setOpacity( opacity );
+	ui.image->setPen( QPen( color, width, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 
 	m_lastPos = event->pos();
 	m_path = QPainterPath( m_lastPos + scrollBarShift() );
@@ -118,30 +134,23 @@ void dHighlighter::mouseMoveEvent( QMouseEvent *event )
 	if( !( event->buttons() & Qt::LeftButton || event->buttons() & Qt::RightButton ) || m_lastPos == QPoint( -1, -1 ) )
 		return;
 
-	if ( ui.image->opacity() == 1.0 )
+	if ( m_pathFlag != PATH_FIRST )
 	{
-		if ( m_pathFlag != PATH_FIRST )
-		{
-			m_pathPrev = m_path;
-			m_pathFlag = PATH_OK;
-		}
-		else
-		{
-			m_pathFlag = PATH_SECOND;
-		}
-
-		if ( m_pathFlag == PATH_OK )
-		{
-			ui.image->drawPath( m_pathPrev, true );
-			m_path = QPainterPath( m_pathPrev.currentPosition() );
-		}
-
-		m_path.quadTo( m_lastPos + scrollBarShift(), ( m_lastPos + event->pos() ) / 2 + scrollBarShift() );
+		m_pathPrev = m_path;
+		m_pathFlag = PATH_OK;
 	}
 	else
 	{
-		m_path.lineTo( event->pos() + scrollBarShift() );
+		m_pathFlag = PATH_SECOND;
 	}
+
+	if ( m_pathFlag == PATH_OK )
+	{
+		ui.image->drawPath( m_pathPrev );
+		m_path = QPainterPath( m_pathPrev.currentPosition() );
+	}
+
+	m_path.quadTo( m_lastPos + scrollBarShift(), ( m_lastPos + event->pos() ) / 2 + scrollBarShift() );
 	
 	ui.image->drawPath( m_path );
 
@@ -156,7 +165,7 @@ void dHighlighter::mouseReleaseEvent( QMouseEvent * /*event*/ )
 	if ( m_path.isEmpty() )
 		ui.image->drawPoint( m_lastPos );
 	else
-		ui.image->drawPath( m_path, true, true );
+		ui.image->drawPath( m_path, true );
 
 	m_lastPos = QPoint( -1, -1 );
 }

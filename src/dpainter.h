@@ -29,7 +29,7 @@ public:
 	~dPainter();
 
 	void drawPoint( const QPoint &point );
-	void drawPath( const QPainterPath &path, bool save = false, bool end = false );
+	void drawPath( const QPainterPath &path, bool end = false );
 
 	double opacity();
 	void setOpacity( double opacity );
@@ -41,9 +41,6 @@ public:
 	void setPixmap( const QPixmap &pixmap );
 
 	void undo();
-
-protected:
-	void paintEvent( QPaintEvent *event );
 
 private:
 	enum actionType
@@ -64,12 +61,14 @@ private:
 		int count;
 	};
 
-	void draw( QPaintDevice *device );
+	void draw( QPaintDevice *device, bool visible = true );
+	void finalize();
+
+	QLabel *m_transparentLayer;
+	QPixmap m_transparentPixmap;
 
 	QPixmap m_pixmap;
 	QPixmap m_pixmap_orig;
-
-	QVector< QPainterPath > m_paths;
 
 	double m_opacity;
 	QPen m_pen;
