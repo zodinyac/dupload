@@ -42,7 +42,8 @@ void dPlayerMpc::update()
 
 	m_dir = dSettings::instance()->get< QString >( "mpcScreensPath" );
 
-	m_watcher->removePaths( m_watcher->directories() );
+	if ( m_watcher->directories().size() )
+		m_watcher->removePaths( m_watcher->directories() );
 	m_watcher->addPath( m_dir );
 
 	m_files = QDir( m_dir ).entryList( QDir::Files | QDir::NoSymLinks | QDir::CaseSensitive, QDir::Name );
@@ -55,7 +56,7 @@ void dPlayerMpc::directoryChanged( const QString &dir )
 
 	auto files = QDir( m_dir ).entryList( QDir::Files | QDir::NoSymLinks | QDir::CaseSensitive, QDir::Name );
 
-	// it's slowly code
+	// It's slowly code.
 	QStringList delta12, delta21; // 12 is for m_files and files, 21 is for files and m_files
 
 	foreach( const QString &dir, m_files )
@@ -68,17 +69,40 @@ void dPlayerMpc::directoryChanged( const QString &dir )
 
 	if ( !delta12.count() && delta21.count() == 1 )
 	{
-		auto *timer = new QTimer();
+		auto timer = new QTimer();
 		timer->setSingleShot( true );
+
+		QString filename = dir + "/" + delta21.first();
+		int *size = new int;
+		*size = 0;
         
+		// It's ugly code, but what can I do?
 		connect( timer, &QTimer::timeout, [=]()
 			{
-				m_dupload->changed( dir + "/" + delta21.first() );
+				QFile file( filename );
+				if ( *size != -1 && *size != file.size() )
+				{
+					*size = file.size();
+					timer->start( 100 );
+
+					return;
+				}
+
+				if ( *size != -1 )
+				{
+					*size = -1;
+					timer->start( 500 );
+
+					return;
+				}
+
+				m_dupload->changed( filename );
 				timer->deleteLater();
+				delete size;
 			}
 		);
 
-		timer->start( 1000 );
+		timer->start( 100 );
 	}
 
 	m_files = files;
