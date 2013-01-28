@@ -74,13 +74,13 @@ void dPlayerMpc::directoryChanged( const QString &dir )
 
 		QString filename = dir + "/" + delta21.first();
 		int *size = new int;
-		*size = 0;
+		*size = -1;
         
 		// It's ugly code, but what can I do?
 		connect( timer, &QTimer::timeout, [=]()
 			{
 				QFile file( filename );
-				if ( *size != -1 && *size != file.size() )
+				if ( *size == -1 || *size != file.size() )
 				{
 					*size = file.size();
 					timer->start( 100 );
@@ -88,11 +88,9 @@ void dPlayerMpc::directoryChanged( const QString &dir )
 					return;
 				}
 
-				if ( *size != -1 )
+				if ( timer->interval() != 500 )
 				{
-					*size = -1;
 					timer->start( 500 );
-
 					return;
 				}
 
