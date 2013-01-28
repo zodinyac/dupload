@@ -90,6 +90,10 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 		QApplication::clipboard()->setImage( ui.image->pixmap().toImage() );
 		close();
 	}
+	else if ( key == m_dupload->nativeKeycode( 'S' ) )
+	{
+		dSettings::instance()->show( 3 );
+	}
 	else if ( event->key() == Qt::Key_Escape )
 	{
 		close();

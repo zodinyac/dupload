@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012-2013 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -17,7 +17,6 @@
 
 dSettings::dSettings()
 {
-	m_shown = false;
 }
 
 dSettings::~dSettings()
@@ -31,20 +30,27 @@ dSettings *dSettings::instance()
 	return me;
 }
 
-void dSettings::show()
+void dSettings::show( int index )
 {
-	if ( m_shown )
-		return;
+	if ( m_settingsDialog )
+	{
+		m_settingsDialog->activateWindow();
+		m_settingsDialog->raise();
+		m_settingsUi.tabWidget->setCurrentIndex( index );
 
-	m_shown = true;
+		return;
+	}
 
 	m_settingsDialog = new QDialog();
 	m_settingsUi.setupUi( m_settingsDialog );
+
+	m_settingsUi.tabWidget->setCurrentIndex( index );
 
 	// dialog
 	m_settingsDialog->setAttribute( Qt::WA_DeleteOnClose, true );
 	m_settingsDialog->setAttribute( Qt::WA_QuitOnClose, false );
 	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowContextHelpButtonHint );
+	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowStaysOnTopHint );
 
 	// mpc screens path
 	m_settingsUi.pathMpcEdit->setText( get< QString >( "mpcScreensPath" ) );
@@ -93,13 +99,11 @@ void dSettings::show()
 	// close button
 	connect( m_settingsUi.closeButton, &QPushButton::clicked, [ this ]( bool )
 		{
-			m_settingsDialog->accept();
+			m_settingsDialog->close();
 		}
 	);
 
-	m_settingsDialog->exec();
-
-	m_shown = false;
+	m_settingsDialog->show();
 }
 
 template < class T >

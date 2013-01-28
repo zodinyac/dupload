@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012-2013 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -30,7 +30,7 @@ public:
 
 	static dSettings *instance();
 
-	void show();
+	void show( int index = 0 );
 
 	template < class T >
 	inline T get( const QString &key, const T &default = T() )
@@ -48,7 +48,7 @@ signals:
 
 private:
 	Ui::dSettingsClass m_settingsUi;
-	QDialog *m_settingsDialog;
+	QPointer< QDialog > m_settingsDialog;
 
 	dSettings();
 
@@ -57,8 +57,6 @@ private:
 	void highlighterSettingsWidth( double value );
 
 	QHash< QString, QVariant > m_settings;
-
-	bool m_shown;
 };
 
 #endif // DSETTINGS_H
