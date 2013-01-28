@@ -23,6 +23,7 @@ QT5_WRAP_UI( dUpload_UI_SOURCES ${dUpload_UI} )
 
 if( WIN32 )
 	add_definitions( -DQT_DLL -DQ_WS_WIN )
+    add_definitions( -DUNICODE -D_UNICODE )
 	list( APPEND dUpload_RESOURCES "resources/dUpload.rc" )
 #	set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/" )
 endif( WIN32 )
