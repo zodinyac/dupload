@@ -167,7 +167,7 @@ void dHighlighter::mouseReleaseEvent( QMouseEvent * /*event*/ )
 		return;
 
 	if ( m_path.isEmpty() )
-		ui.image->drawPoint( m_lastPos );
+		ui.image->drawPoint( m_lastPos + scrollBarShift() );
 	else
 		ui.image->drawPath( m_path, true );
 

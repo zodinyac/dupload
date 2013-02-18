@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009, 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009, 2012-2013 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -99,6 +99,8 @@ void dropArea::dropEvent( QDropEvent *event )
 	if ( event->mimeData()->urls().size() > 1 && m_dupload->authorized() )
 	{
 		m_urls = event->mimeData()->urls();
+		qSort( m_urls );
+
 		lock();
 
 		m_gallery = new dGallery( m_dupload );
