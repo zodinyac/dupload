@@ -99,7 +99,11 @@ void dropArea::dropEvent( QDropEvent *event )
 	if ( event->mimeData()->urls().size() > 1 && m_dupload->authorized() )
 	{
 		m_urls = event->mimeData()->urls();
-		qSort( m_urls );
+		qSort( m_urls.begin(), m_urls.end(), []( const QUrl &url1, const QUrl &url2 )
+				{
+					return QFileInfo( url1.toLocalFile() ).lastModified() < QFileInfo( url2.toLocalFile() ).lastModified();
+				}
+			);
 
 		lock();
 
