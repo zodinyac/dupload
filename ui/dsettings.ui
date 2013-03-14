@@ -33,36 +33,29 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="mpcTab">
+     <widget class="QWidget" name="mpTab">
       <attribute name="title">
-       <string>MPC settings</string>
+       <string>Media players</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="2" column="0" colspan="2">
-        <widget class="QLineEdit" name="pathMpcEdit">
+        <widget class="QLineEdit" name="MPNamesEdit">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
        <item row="0" column="0" colspan="2">
-        <widget class="QCheckBox" name="enableMpcCheckBox">
+        <widget class="QCheckBox" name="enableMPCheckBox">
          <property name="text">
           <string>Enable</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="folderMpcLabel">
+        <widget class="QLabel" name="mediaPlayersLabel">
          <property name="text">
-          <string>Select the folder where screenshots from mpc are:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="browseMpcButton">
-         <property name="text">
-          <string>Browse</string>
+          <string>List your media player executables separated by commas (example: mpc-hc.exe):</string>
          </property>
         </widget>
        </item>
@@ -75,6 +68,40 @@
           <size>
            <width>20</width>
            <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="folderWatcherTab">
+      <attribute name="title">
+       <string>Folder watcher</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0" colspan="2">
+        <widget class="QCheckBox" name="enableFWCheckBox">
+         <property name="text">
+          <string>Enable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="folderFWLabel">
+         <property name="text">
+          <string>Select folders to watch:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>400</width>
+           <height>243</height>
           </size>
          </property>
         </spacer>

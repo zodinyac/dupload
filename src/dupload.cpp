@@ -29,6 +29,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	connect( droparea, SIGNAL( clicked() ), this, SLOT( clicked() ) );
 	ui.layout->addWidget( droparea, 0, 0 );
 
+	QAbstractEventDispatcher::instance()->installNativeEventFilter( this );
 	QNetworkProxyFactory::setUseSystemConfiguration( true );
 
 	m_netman = new QNetworkAccessManager();
@@ -38,7 +39,10 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	m_webcam_creating = false;
 
-	new dPlayerMpc( this );
+	//new dPlayerMpc( this );
+
+	m_dll = new dDll();
+	connect( dSettings::instance(), &dSettings::settingsChanged, m_dll, &dDll::updateSettings );
 
 	setUserlogin( QString() );
 
@@ -176,6 +180,8 @@ void dUpload::show( Qt::WindowFlags flags )
 {
 	setWindowFlags( flags );
 	show();
+
+	m_dll->changeHWND( ( HWND )winId() );
 }
 
 void dUpload::changed( const QString &file, const QString &gallery )
@@ -456,6 +462,45 @@ void dUpload::paintEvent( QPaintEvent *event )
 		p.setCompositionMode( QPainter::CompositionMode_Clear );
 		p.fillRect( 0, 0, width(), height(), QColor() );
 	}
+}
+
+bool dUpload::nativeEventFilter( const QByteArray &eventType, void *event, long *result )
+{
+	if ( eventType == "windows_generic_MSG" )
+	{
+		MSG *message = ( MSG * )event;
+
+		if ( message->message == WM_COPYDATA )
+		{
+			bool enableMP = dSettings::instance()->get( "enableMP", false );
+
+			if ( enableMP )
+			{
+				TCHAR filePath[ MAX_PATH ];
+
+				COPYDATASTRUCT *data = ( COPYDATASTRUCT * )( message->lParam );
+				memcpy_s( filePath, MAX_PATH, data->lpData, MAX_PATH );
+
+				QString file = QString::fromWCharArray( filePath ).remove( 0, 4 );
+
+				emit changed( file );
+			}
+
+			return enableMP;
+		}
+    }
+
+    return false;
+}
+
+bool dUpload::event( QEvent *event )
+{
+	if ( event->type() == QEvent::WinIdChange )
+	{
+		m_dll->changeHWND( ( HWND )winId() );
+	}
+	
+	return QWidget::event( event );
 }
 
 quint32 dUpload::nativeKeycode( QChar key )

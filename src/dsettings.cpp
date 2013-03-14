@@ -52,38 +52,28 @@ void dSettings::show( int index )
 	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowContextHelpButtonHint );
 	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowStaysOnTopHint );
 
-	// mpc screens path
-	m_settingsUi.pathMpcEdit->setText( get< QString >( "mpcScreensPath" ) );
+	// media playes names
+	m_settingsUi.MPNamesEdit->setText( get< QString >( "MPNames" ) );
 
-	// enable mpc checkbox
-	connect( m_settingsUi.enableMpcCheckBox, &QCheckBox::toggled, [ this ]( bool checked )
+	// enable media players checkbox
+	connect( m_settingsUi.enableMPCheckBox, &QCheckBox::toggled, [ this ]( bool checked )
 		{
-			set( "enableMpc", checked );
+			set( "enableMP", checked );
 
-			m_settingsUi.folderMpcLabel->setEnabled( checked );
-			m_settingsUi.browseMpcButton->setEnabled( checked );
-			m_settingsUi.pathMpcEdit->setEnabled( checked );
+			m_settingsUi.mediaPlayersLabel->setEnabled( checked );
+			m_settingsUi.MPNamesEdit->setEnabled( checked );
 
-			// set path to snapshotpath from registry (or home) if it doesn't exist
-			if ( m_settingsUi.pathMpcEdit->text().isEmpty() || !QDir( m_settingsUi.pathMpcEdit->text() ).exists() )
-				m_settingsUi.pathMpcEdit->setText( QSettings( "HKEY_CURRENT_USER\\Software\\Gabest\\Media Player Classic\\Settings", QSettings::NativeFormat ).value( "SnapShotPath", QDir::homePath() ).toString() );
+			if ( m_settingsUi.MPNamesEdit->text().isEmpty() )
+			{
+				m_settingsUi.MPNamesEdit->setText( "mpc-hc.exe" );
+			}
 
-			set( "mpcScreensPath", m_settingsUi.pathMpcEdit->text() );
+			set( "MPNames", m_settingsUi.MPNamesEdit->text() );
 		}
 	);
 
-	m_settingsUi.enableMpcCheckBox->setChecked( get( "enableMpc", false ) );
-	m_settingsUi.enableMpcCheckBox->toggled( m_settingsUi.enableMpcCheckBox->isChecked() );
-
-	// browse mpc button
-	connect( m_settingsUi.browseMpcButton, &QPushButton::clicked, [ this ]( bool )
-		{
-			QString dir = QFileDialog::getExistingDirectory( m_settingsDialog, "Select the mpc screenshots directory", m_settingsUi.pathMpcEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
-
-			m_settingsUi.pathMpcEdit->setText( dir );
-			set( "mpcScreensPath", dir );
-		}
-	);
+	m_settingsUi.enableMPCheckBox->setChecked( get( "enableMP", false ) );
+	m_settingsUi.enableMPCheckBox->toggled( m_settingsUi.enableMPCheckBox->isChecked() );
 
 	// highlighter
 	highlighterSettingsLoad();

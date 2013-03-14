@@ -36,6 +36,7 @@
 #include "dsettings.h"
 #include "dplayermpc.h"
 #include "dareaselector.h"
+#include "ddll.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
@@ -51,7 +52,7 @@ class dropArea;
 class dWebCam;
 class dAreaSelector;
 
-class dUpload : public QWidget
+class dUpload : public QWidget, public QAbstractNativeEventFilter
 {
 	Q_OBJECT
 
@@ -80,6 +81,8 @@ public:
 
 	quint32 nativeKeycode( QChar key );
 
+	bool nativeEventFilter( const QByteArray &eventType, void *event, long *result );
+
 signals:
 	void finished();
 
@@ -94,8 +97,9 @@ protected:
 	void closeEvent( QCloseEvent *event );
 	void keyPressEvent( QKeyEvent *event );
 	void mouseMoveEvent( QMouseEvent* event );
-	void mousePressEvent( QMouseEvent* event );
+	void mousePressEvent( QMouseEvent *event );
 	void paintEvent( QPaintEvent *event );
+	bool event( QEvent *event );
 	
 private:
 	void aeroBackground();
@@ -106,6 +110,8 @@ private:
 	QPoint m_drag_pos;
 
 	dTrayIcon *m_trayicon;
+
+	dDll *m_dll;
 
 	QIcon m_icon;
 

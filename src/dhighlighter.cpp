@@ -113,8 +113,6 @@ void dHighlighter::mousePressEvent( QMouseEvent *event )
 		color = settings->get< QColor >( "highlighterLeftButtonColor", Qt::red );
 		opacity = settings->get( "highlighterLeftButtonOpacity", 1.0 );
 		width = settings->get( "highlighterLeftButtonWidth", 4.0 );
-
-		qDebug() << color.isValid() << color;
 	}
 	else
 	{
@@ -172,6 +170,12 @@ void dHighlighter::mouseReleaseEvent( QMouseEvent * /*event*/ )
 		ui.image->drawPath( m_path, true );
 
 	m_lastPos = QPoint( -1, -1 );
+}
+
+void dHighlighter::tabletEvent( QTabletEvent *event )
+{
+	qDebug() << event->device() << event->globalPos() << event->pos() << event->pressure() << event->rotation() << event->tangentialPressure();
+	event->accept();
 }
 
 QPoint dHighlighter::scrollBarShift()
