@@ -71,9 +71,69 @@ void dSettings::show( int index )
 			set( "MPNames", m_settingsUi.MPNamesEdit->text() );
 		}
 	);
+	connect( m_settingsUi.MPNamesEdit, &QLineEdit::textChanged, [ this ]( const QString & )
+		{
+			set( "MPNames", m_settingsUi.MPNamesEdit->text() );
+		}
+	);
 
 	m_settingsUi.enableMPCheckBox->setChecked( get( "enableMP", false ) );
 	m_settingsUi.enableMPCheckBox->toggled( m_settingsUi.enableMPCheckBox->isChecked() );
+
+	// save to file
+	connect( m_settingsUi.s2fCheckBox, &QCheckBox::toggled, [ this ]( bool checked )
+		{
+			set( "s2fEnabled", checked );
+
+			if ( m_settingsUi.s2fDirectoryEdit->text().isEmpty() )
+			{
+				m_settingsUi.s2fDirectoryEdit->setText( QDir::homePath() );
+				set( "s2fDirectoryPath", m_settingsUi.s2fDirectoryEdit->text() );
+			}
+
+			s2fSetEnabled( checked );
+		}
+	);
+
+	m_settingsUi.s2fDirectoryEdit->setText( get< QString >( "s2fDirectoryPath" ) );
+
+	m_settingsUi.s2fCheckBox->setChecked( get( "s2fEnabled", false ) );
+	m_settingsUi.s2fCheckBox->toggled( m_settingsUi.s2fCheckBox->isChecked() );
+
+	connect( m_settingsUi.s2fDirectoryButton, &QPushButton::clicked, [ this ]( bool )
+		{
+			QString dir = QFileDialog::getExistingDirectory( m_settingsDialog, "Select directory where screenshots will be saved", m_settingsUi.s2fDirectoryEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+	
+			m_settingsUi.s2fDirectoryEdit->setText( dir );
+			set( "s2fDirectoryPath", dir );
+		}
+	);
+
+	connect( m_settingsUi.s2fDirectoryRadio, &QRadioButton::toggled, [ this ]( bool checked )
+		{
+			set( "s2fSaveType", 1 );
+			s2fSetEnabled();
+		}
+	);
+	connect( m_settingsUi.s2fAskRadio, &QRadioButton::toggled, [ this ]( bool checked )
+		{
+			set( "s2fSaveType", 2 );
+			s2fSetEnabled();
+		}
+	);
+
+	if ( get( "s2fSaveType", 1 ) == 1 )
+	{
+		m_settingsUi.s2fDirectoryRadio->setChecked( true );
+		m_settingsUi.s2fDirectoryRadio->toggled( true );
+	}
+	else
+	{
+		m_settingsUi.s2fAskRadio->setChecked( true );
+		m_settingsUi.s2fAskRadio->toggled( true );
+	}
+
+	s2fSetEnabled( get( "s2fEnabled", false ) );
 
 	// highlighter
 	highlighterSettingsLoad();
@@ -107,6 +167,23 @@ void dSettings::set( const QString &key, const T &value )
 int dSettings::remove( const QString &key )
 {
 	return m_settings.remove( key );
+}
+
+void dSettings::s2fSetEnabled( bool enabled )
+{
+	m_settingsUi.s2fDirectoryRadio->setEnabled( enabled );
+	m_settingsUi.s2fDirectoryEdit->setEnabled( enabled );
+	m_settingsUi.s2fDirectoryButton->setEnabled( enabled );
+	m_settingsUi.s2fAskRadio->setEnabled( enabled );
+
+	if ( enabled )
+	{
+		if ( get( "s2fSaveType", 1 ) == 2 )
+		{
+			m_settingsUi.s2fDirectoryEdit->setEnabled( !enabled );
+			m_settingsUi.s2fDirectoryButton->setEnabled( !enabled );
+		}
+	}
 }
 
 void dSettings::highlighterSettingsLoad()

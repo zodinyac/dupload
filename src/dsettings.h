@@ -52,6 +52,8 @@ private:
 
 	dSettings();
 
+	void s2fSetEnabled( bool enabled = true );
+
 	void highlighterSettingsLoad();
 	void highlighterSettingsColor( bool checked = false );
 	void highlighterSettingsWidth( double value );

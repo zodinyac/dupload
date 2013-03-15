@@ -92,7 +92,7 @@ void dHighlighter::keyPressEvent( QKeyEvent *event )
 	}
 	else if ( key == m_dupload->nativeKeycode( 'S' ) )
 	{
-		dSettings::instance()->show( 3 );
+		dSettings::instance()->show( 2 ); // for highlighter settings tab
 	}
 	else if ( event->key() == Qt::Key_Escape )
 	{

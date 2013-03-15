@@ -44,6 +44,8 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	m_dll = new dDll();
 	connect( dSettings::instance(), &dSettings::settingsChanged, m_dll, &dDll::updateSettings );
 
+	m_file = new dFile();
+
 	setUserlogin( QString() );
 
 	dExternal::instance( this );
@@ -56,6 +58,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+S" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+W" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+S" );
+	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+F" );
 
 	connect( dGlobalHotKey::instance(), SIGNAL( hotKeyPressed( quint32 ) ), this, SLOT( hotKeyPressed( quint32 ) ) );
 
@@ -207,6 +210,15 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	ui.progress->setValue( 0 );
 	ui.progress->setVisible( true );
 
+	if ( dSettings::instance()->get( "s2fEnabled", false ) )
+	{
+		QString filePath = m_file->save( arr, type );
+
+		finished( ( QNetworkReply * )&filePath );
+
+		return;
+	}
+
 	QByteArray data;
 	QNetworkRequest request( QUrl( "http://vfc.cc/upload.php" ) );
 
@@ -281,15 +293,27 @@ void dUpload::progress( qint64 received, qint64 total )
 
 void dUpload::finished( QNetworkReply *reply )
 {
-#if defined( DTASKBARACTIVE )
-	dTaskBar::instance()->setProgressState( (HWND)this->winId() );
-#endif // DTASKBARACTIVE
-
-	QString r = reply->readAll();
-
 	droparea->lock( false );
 	droparea->setVisible( true );
 	ui.progress->setVisible( false );
+
+	QString r;
+	if ( !dSettings::instance()->get( "s2fEnabled", false ) )
+	{
+		#if defined( DTASKBARACTIVE )
+		dTaskBar::instance()->setProgressState( (HWND)this->winId() );
+		#endif // DTASKBARACTIVE
+
+		r = reply->readAll();
+	}
+	else
+	{
+		r = *( QString * )reply;
+
+		if ( r == "E:IGNORE" )
+			return;
+	}
+	
 	if ( r.startsWith( "E:" ) )
 	{
 		droparea->settext( r );
@@ -298,7 +322,15 @@ void dUpload::finished( QNetworkReply *reply )
 	else if ( !r.isEmpty() )
 	{
 		m_filename = r;
-		m_link = "http://vfc.cc/" + m_filename;
+
+		if ( !dSettings::instance()->get( "s2fEnabled", false ) )
+		{
+			m_link = "http://vfc.cc/" + m_filename;
+		}
+		else
+		{
+			m_link = m_filename;
+		}
 
 		QApplication::clipboard()->setText( m_link );
 		droparea->settext( "OK" );
@@ -322,7 +354,10 @@ void dUpload::finished( QNetworkReply *reply )
 		m_trayicon->message( "E:0", 2 );
 	}
 
-	reply->deleteLater();
+	if ( !dSettings::instance()->get( "s2fEnabled", false ) )
+	{
+		reply->deleteLater();
+	}
 }
 
 void dUpload::clicked()
@@ -439,6 +474,20 @@ void dUpload::hotKeyPressed( quint32 k )
 	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+Alt+S" ) )
 	{
 		dSettings::instance()->show();
+	}
+	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+Alt+F" ) )
+	{
+		bool state = !dSettings::instance()->get( "s2fEnabled", false );
+		dSettings::instance()->set( "s2fEnabled", state );
+
+		if ( state )
+		{
+			notify( "Save to file is enabled" );
+		}
+		else
+		{
+			notify( "Save to file is disabled" );
+		}
 	}
 }
 

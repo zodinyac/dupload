@@ -37,6 +37,7 @@
 #include "dplayermpc.h"
 #include "dareaselector.h"
 #include "ddll.h"
+#include "dfile.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
@@ -112,6 +113,7 @@ private:
 	dTrayIcon *m_trayicon;
 
 	dDll *m_dll;
+	dFile *m_file;
 
 	QIcon m_icon;
 
