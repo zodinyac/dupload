@@ -55,6 +55,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	dGlobalHotKey::instance()->shortcut( "Alt+V" );
 	dGlobalHotKey::instance()->shortcut( "Alt+S" );
 	dGlobalHotKey::instance()->shortcut( "Alt+E" );
+	dGlobalHotKey::instance()->shortcut( "Alt+A" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+S" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+W" );
 	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+S" );
@@ -203,7 +204,7 @@ void dUpload::changed( const QString &file, const QString &gallery )
 	f.close();
 }
 
-void dUpload::load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery )
+void dUpload::load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery, bool autoConvert )
 {
 	droparea->lock();
 	droparea->setVisible( false );
@@ -223,7 +224,6 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	QNetworkRequest request( QUrl( "http://vfc.cc/upload.php" ) );
 
 	QString author;
-
 	if ( gallery.isEmpty() )
 	{
 		author = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"author\"\r\n\r\n" + m_userlogin + "\r\n";
@@ -233,10 +233,17 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 		author = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"p\"\r\n\r\n" + m_passkey + "\r\n";
 		author += "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"gallery\"\r\n\r\n" + gallery + "\r\n";
 	}
+
+	
+
 	QString begin = "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"image\"; filename=\"" + filename + "\"\r\nContent-Type: image/" + type + "\r\n\r\n";
 	QString end = "\r\n------------TSrVsleyvjLUMocQf0NMuB--\r\n";
 
 	data.append( author.toUtf8() );
+	if ( autoConvert )
+	{
+		data.append( QString( "------------TSrVsleyvjLUMocQf0NMuB\r\nContent-Disposition: form-data; name=\"autoConvert\"\r\n\r\n\r\n" ).toUtf8() );
+	}
 	data.append( begin.toUtf8() );
 	data.append( arr );
 	data.append( end.toUtf8() );
@@ -277,6 +284,11 @@ void dUpload::sendFromClipboard( int type, const QString &gallery )
 	{
 		QApplication::clipboard()->image().save( &buffer, "PNG" );
 		load( arr, "png", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".png" );
+	}
+	else if ( type == 2 )
+	{
+		QApplication::clipboard()->image().save( &buffer, "PNG" );
+		load( arr, "png", QString::number( QDateTime::currentDateTime().toTime_t() ) + ".png", QString(), true );
 	}
 }
 
@@ -447,6 +459,11 @@ void dUpload::hotKeyPressed( quint32 k )
 		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+E" ) )
 		new dHighlighter( this );
+	else if ( k == dGlobalHotKey::instance()->id( "Alt+A" ) )
+	{
+		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
+		sendFromClipboard( 2 );
+	}
 	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+S" ) )
 	{
 		if ( m_dareaselector )

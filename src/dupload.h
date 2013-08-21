@@ -104,7 +104,7 @@ protected:
 	
 private:
 	void aeroBackground();
-	void load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery = QString() );
+	void load( const QByteArray &arr, const QString &type, const QString &filename, const QString &gallery = QString(), bool autoConvert = false );
 
 	Ui::dUploadClass ui;
 
