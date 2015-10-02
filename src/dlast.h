@@ -19,6 +19,7 @@
 #include <QtGui/QClipboard>
 #include <QtWidgets/QDialog>
 #include "dupload.h"
+#include "dwebenginepage.h"
 #include "ui_dlast.h"
 
 class dLast : public QDialog
@@ -32,13 +33,11 @@ public:
 public slots:
 	void copyLinkToClipboard( const QUrl &url );
 
-protected:
-	bool eventFilter( QObject *o, QEvent *e );
-
 private:
 	Ui::dLastClass ui;
 
 	dUpload *m_dupload;
+	dWebEnginePage *m_page;
 };
 
 #endif // DLAST_H

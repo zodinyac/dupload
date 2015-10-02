@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2010, 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2015 by Belov Nikita <zodiac.nv@gmail.com>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,31 +13,24 @@
  ***************************************************************************
 *****************************************************************************/
 
-#include "dlast.h"
+#ifndef DWEBENGINEVIEWPAGE_H
+#define DWEBENGINEVIEWPAGE_H
 
-dLast::dLast( dUpload *d ) : m_dupload( d ), QDialog( d )
+#include <QtWebEngineWidgets/QWebEnginePage>
+
+class dWebEnginePage : public QWebEnginePage
 {
-	ui.setupUi( this );
-	setAttribute( Qt::WA_DeleteOnClose );
-	setAttribute( Qt::WA_QuitOnClose, false );
+	Q_OBJECT
 
-	m_page = new dWebEnginePage( ui.webView );
+public:
+	dWebEnginePage( QObject *parent = 0 );
+	~dWebEnginePage();
 
-	ui.webView->setContextMenuPolicy( Qt::NoContextMenu );
-	ui.webView->setPage( m_page );
-	ui.webView->setUrl( "http://vfc.cc/last/" + m_dupload->passkey() );
+signals:
+	void linkClicked( const QUrl &url );
 
-	connect( ui.webView->page(), SIGNAL( linkClicked( const QUrl & ) ), this, SLOT( copyLinkToClipboard( const QUrl & ) ) );
+protected:
+	bool acceptNavigationRequest( const QUrl &url, NavigationType type, bool isMainFrame = 0 );
+};
 
-	show();
-}
-
-dLast::~dLast()
-{
-}
-
-void dLast::copyLinkToClipboard( const QUrl &url )
-{
-	QApplication::clipboard()->setText( url.toString() );
-	m_dupload->notify( "Link was successfully copied to clipboard" );
-}
+#endif // DWEBENGINEVIEWPAGE_H

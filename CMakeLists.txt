@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8.8 )
+cmake_minimum_required( VERSION 2.8.11 )
 
 project( dUpload )
 
@@ -10,8 +10,8 @@ find_package( Qt5Gui REQUIRED )
 find_package( Qt5Multimedia REQUIRED )
 find_package( Qt5MultimediaWidgets REQUIRED )
 find_package( Qt5Network REQUIRED )
-find_package( Qt5OpenGL REQUIRED )
-find_package( Qt5WebKit REQUIRED )
+find_package( Qt5WebEngine REQUIRED )
+find_package( Qt5WebEngineWidgets REQUIRED )
 find_package( Qt5Widgets REQUIRED )
 
 file( GLOB dUpload_INCLUDES "src/*.h" )
@@ -30,11 +30,7 @@ endif( WIN32 )
 
 add_executable( dUpload WIN32 MACOSX_BUNDLE ${dUpload_INCLUDES} ${dUpload_SOURCES} ${dUpload_UI_SOURCES} ${dUpload_RESOURCES} )
 
-qt5_use_modules( dUpload Core Gui Multimedia MultimediaWidgets Network WebKit Widgets )
-
-if( WIN32 )
-	target_link_libraries( dUpload ${Qt5Core_QTMAIN_LIBRARIES} )
-endif( WIN32 )
+target_link_libraries( dUpload Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Network Qt5::WebEngine Qt5::WebEngineWidgets Qt5::Widgets )
 
 if( APPLE )
 	#SET( MACOSX_BUNDLE_ICON_FILE Speedcrunch.icns )
