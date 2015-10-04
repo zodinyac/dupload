@@ -13,24 +13,33 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DWEBENGINEVIEWPAGE_H
-#define DWEBENGINEVIEWPAGE_H
+#ifndef DIMAGEVIEW_H
+#define DIMAGEVIEW_H
 
-#include <QtWebEngineWidgets/QWebEnginePage>
+#include <QtWidgets/QLabel>
+#include <QtNetwork/QtNetwork>
 
-class dWebEnginePage : public QWebEnginePage
+class dImageView : public QLabel
 {
 	Q_OBJECT
 
 public:
-	dWebEnginePage( QObject *parent = 0 );
-	~dWebEnginePage();
+	dImageView( const QString &id, QWidget *parent = 0 );
+	~dImageView();
+
+public slots:
+	void finished( QNetworkReply *reply );
 
 signals:
-	void linkClicked( const QUrl &url );
+	void clicked( const QString &url );
 
 protected:
-	bool acceptNavigationRequest( const QUrl &url, NavigationType type, bool isMainFrame = 0 );
+	void mousePressEvent( QMouseEvent * event );
+
+private:
+	QString m_image;
+
+	QNetworkAccessManager m_netman;
 };
 
-#endif // DWEBENGINEVIEWPAGE_H
+#endif // DIMAGEVIEW_H
