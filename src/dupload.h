@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010, 2012-2013 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012-2013, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -22,7 +22,6 @@
 #include <QtCore/QFile>
 #include <QtGui/QClipboard>
 #include <QtNetwork/QtNetwork>
-#include "qtwin.h"
 #include "ui_dupload.h"
 #include "droparea.h"
 #include "dpreview.h"

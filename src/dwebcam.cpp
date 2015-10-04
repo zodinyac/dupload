@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -13,6 +13,12 @@
  ***************************************************************************
 *****************************************************************************/
 
+#include <QtWinExtras>
+
+#ifdef Q_OS_WIN
+#include "shobjidl.h"
+#endif
+
 #include "dwebcam.h"
 
 QByteArray dWebCam::m_defaultDevice = QByteArray(); 
@@ -23,11 +29,7 @@ dWebCam::dWebCam( dUpload *d ) : m_dupload( d )
 	setAttribute( Qt::WA_DeleteOnClose );
 	setAttribute( Qt::WA_QuitOnClose, false );
 
-	if ( QtWin::isCompositionEnabled() )
-	{
-		setAttribute( Qt::WA_TranslucentBackground, true );
-		QtWin::extendFrameIntoClientArea( this );
-	}
+	aeroBackground();
 
 	QList< QByteArray > cams = QCamera::availableDevices();
 	if ( !cams.contains( m_defaultDevice ) )
@@ -267,16 +269,31 @@ void dWebCam::cameraStateChanged( QCamera::State state )
 	ui.timerButton->setEnabled( state == QCamera::ActiveState );
 }
 
-bool dWebCam::nativeEvent( QByteArray ba, void *message, long *result )
+void dWebCam::aeroBackground()
 {
-	if ( ba == "windows_generic_MSG" )
+	if ( QtWin::isCompositionEnabled() )
 	{
-		if ( ( MSG* )message && ( (MSG*)message )->message == WM_DWMCOMPOSITIONCHANGED )
-			if ( QtWin::isCompositionEnabled() )
-				QtWin::extendFrameIntoClientArea( this );
+		QtWin::extendFrameIntoClientArea( this, -1, -1, -1, -1 );
+		setAttribute( Qt::WA_TranslucentBackground, true );
+		setAttribute( Qt::WA_NoSystemBackground, false );
+		setStyleSheet( "dWebCam { background: transparent; }" );
+	}
+	else
+	{
+		QtWin::resetExtendedFrame( this );
+		setAttribute( Qt::WA_TranslucentBackground, false );
+		setStyleSheet( QString( "dWebCam { background: %1; }" ).arg( QtWin::realColorizationColor().name() ) );
+	}
+}
+
+bool dWebCam::event( QEvent *event )
+{
+	if ( event->type() == QWinEvent::CompositionChange || event->type() == QWinEvent::ColorizationChange )
+	{
+		aeroBackground();
 	}
 
-	return QWidget::nativeEvent( ba, message, result );
+	return QWidget::event( event );
 }
 
 void dWebCam::mousePressEvent( QMouseEvent *event )

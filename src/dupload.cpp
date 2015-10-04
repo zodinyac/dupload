@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010, 2012-2013 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012-2013, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -12,6 +12,12 @@
  *                                                                         *
  ***************************************************************************
 *****************************************************************************/
+
+#include <QtWinExtras>
+
+#ifdef Q_OS_WIN
+#include "shobjidl.h"
+#endif
 
 #include "dupload.h"
 
@@ -146,15 +152,18 @@ void dUpload::setLink( const QString &link )
 
 void dUpload::aeroBackground()
 {
-	bool compositionEnabled = QtWin::isCompositionEnabled();
-	if ( compositionEnabled )
+	if ( QtWin::isCompositionEnabled() )
 	{
+		QtWin::extendFrameIntoClientArea( this, -1, -1, -1, -1 );
 		setAttribute( Qt::WA_TranslucentBackground, true );
-		QtWin::extendFrameIntoClientArea( this );
+		setAttribute( Qt::WA_NoSystemBackground, false );
+		setStyleSheet( "dUpload { background: transparent; }" );
 	}
 	else
 	{
-		setAttribute( Qt::WA_NoSystemBackground, false );
+		QtWin::resetExtendedFrame( this );
+		setAttribute( Qt::WA_TranslucentBackground, false );
+		setStyleSheet( QString( "dUpload { background: %1; }" ).arg( QtWin::realColorizationColor().name() ) );
 	}
 }
 
@@ -565,7 +574,11 @@ bool dUpload::event( QEvent *event )
 	{
 		m_dll->changeHWND( ( HWND )winId() );
 	}
-	
+	else if ( event->type() == QWinEvent::CompositionChange || event->type() == QWinEvent::ColorizationChange )
+	{
+		aeroBackground();
+	}
+
 	return QWidget::event( event );
 }
 

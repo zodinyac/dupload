@@ -11,6 +11,7 @@ find_package( Qt5Multimedia REQUIRED )
 find_package( Qt5MultimediaWidgets REQUIRED )
 find_package( Qt5Network REQUIRED )
 find_package( Qt5Widgets REQUIRED )
+find_package( Qt5WinExtras REQUIRED )
 
 file( GLOB dUpload_INCLUDES "src/*.h" )
 file( GLOB dUpload_SOURCES "src/*.cpp" )
@@ -28,7 +29,7 @@ endif( WIN32 )
 
 add_executable( dUpload WIN32 MACOSX_BUNDLE ${dUpload_INCLUDES} ${dUpload_SOURCES} ${dUpload_UI_SOURCES} ${dUpload_RESOURCES} )
 
-target_link_libraries( dUpload Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Network Qt5::Widgets )
+target_link_libraries( dUpload Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Network Qt5::Widgets Qt5::WinExtras )
 
 if( APPLE )
 	#SET( MACOSX_BUNDLE_ICON_FILE Speedcrunch.icns )

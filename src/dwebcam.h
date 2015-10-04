@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -32,20 +32,21 @@ public:
 	dWebCam( dUpload *d );
 	~dWebCam();
 
-	bool nativeEvent( QByteArray ba, void *message, long *result );
-
 public slots:
 	void cameraError( QCamera::Error value );
 	void cameraStateChanged( QCamera::State state );
 	void capture( bool checked = false );
 
 protected:
+	bool event( QEvent *event );
 	void mouseMoveEvent( QMouseEvent* event );
 	void mousePressEvent( QMouseEvent* event );
 	void paintEvent( QPaintEvent *event );
 	void resizeEvent( QResizeEvent *event );
 
 private:
+	void aeroBackground();
+
 	Ui::dWebCamClass ui;
 	Ui::dWebCamSelectClass select_ui;
 	dUpload *m_dupload;
