@@ -47,9 +47,9 @@ void dImageView::finished( QNetworkReply *reply )
 
 		setPixmap( img );
 		setFixedSize( img.size() );
-
-		reply->deleteLater();
 	}
+
+	reply->deleteLater();
 }
 
 void dImageView::mousePressEvent( QMouseEvent *event )

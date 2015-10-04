@@ -44,12 +44,20 @@ void dPreview::progress( qint64 received, qint64 total )
 
 void dPreview::finished( QNetworkReply *reply )
 {
-	QPixmap img;
-	img.loadFromData( reply->readAll() );
+	QUrl redirectUrl = reply->attribute( QNetworkRequest::RedirectionTargetAttribute ).toUrl();
+	if ( !redirectUrl.isEmpty() )
+	{
+		m_netman->get( QNetworkRequest( redirectUrl ) );
+	}
+	else
+	{
+		QPixmap img;
+		img.loadFromData( reply->readAll() );
 
-	ui.progress->setVisible( false );
-	ui.label->setVisible( true );
-	ui.label->setPixmap( img );
+		ui.progress->setVisible( false );
+		ui.label->setVisible( true );
+		ui.label->setPixmap( img );
+	}
 
 	reply->deleteLater();
 }
