@@ -143,7 +143,7 @@ void dropArea::uploadFinished()
 	}
 	else if ( m_q == m_urls.size() )
 	{
-		QString link = "http://i.deltaz.org/g" + m_gid;
+		QString link = QString( "http://%1/g%2" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ).arg( m_gid );
 
 		QApplication::clipboard()->setText( link );
 		settext( "OK" );

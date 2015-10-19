@@ -14,6 +14,7 @@
 *****************************************************************************/
 
 #include "dpreview.h"
+#include "dsettings.h"
 #include <QtWidgets/QMessageBox>
 
 dPreview::dPreview( const QString &link, QWidget *parent ) : QDialog( parent )
@@ -25,7 +26,7 @@ dPreview::dPreview( const QString &link, QWidget *parent ) : QDialog( parent )
 	m_netman = new QNetworkAccessManager();
 	connect( m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
 
-	QNetworkReply* netr = m_netman->get( QNetworkRequest( QUrl( "http://vfc.cc/t_" + link ) ) );
+	QNetworkReply* netr = m_netman->get( QNetworkRequest( QUrl( QString( "http://%1/t%2" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ).arg( link ) ) ) );
 	connect( netr, SIGNAL( downloadProgress( qint64, qint64 ) ), this, SLOT( progress( qint64, qint64 ) ) );
 
 	show();

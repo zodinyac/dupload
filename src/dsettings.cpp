@@ -17,6 +17,7 @@
 
 dSettings::dSettings()
 {
+	serverSettingsLoad();
 }
 
 dSettings::~dSettings()
@@ -230,4 +231,23 @@ void dSettings::highlighterSettingsWidth( double value )
 	set( name, value );
 
 	highlighterSettingsLoad();
+}
+
+void dSettings::serverSettingsLoad()
+{
+	QFile server( "./server.txt" );
+	if ( server.exists() && server.open( QIODevice::ReadOnly | QIODevice::Text ) )
+	{
+		QTextStream in( &server );
+		QString serverAddress;
+
+		in >> serverAddress >> endl;
+		set( "serverAddress", serverAddress );
+
+		server.close();
+	}
+	else
+	{
+		set< QString >( "serverAddress", "vfc.cc" );
+	}
 }

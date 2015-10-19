@@ -97,7 +97,7 @@ void dGallery::on_createButton_clicked()
 	QByteArray data;
 	data.append( "n=" + QUrl::toPercentEncoding( ui.nameEdit->text() ) + "&d=" + QUrl::toPercentEncoding( ui.descEdit->toPlainText() ) + "&p=" + m_dupload->passkey() );
 
-	QNetworkRequest request( QUrl( "http://vfc.cc/gallery.php" ) );
+	QNetworkRequest request( QUrl( QString( "http://%1/gallery.php" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ) ) );
 	request.setRawHeader( "Content-Type", QString( "application/x-www-form-urlencoded; charset=utf-8" ).toUtf8() );
 	m_netman->post( request, data );
 }
@@ -113,7 +113,7 @@ void dGallery::on_useButton_clicked()
 
 	ui.useButton->setDisabled( true );
 
-	m_netman->get( QNetworkRequest ( QUrl( "http://vfc.cc/gallery.php?i=" + ui.idEdit->text().right( 32 ) + "&d=1" ) ) );
+	m_netman->get( QNetworkRequest ( QUrl( "http://" + dSettings::instance()->get< QString >( "serverAddress" ) + "/gallery.php?i=" + ui.idEdit->text().right( 32 ) + "&d=1" ) ) );
 }
 
 void dGallery::finished( QNetworkReply *reply )

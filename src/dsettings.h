@@ -58,6 +58,8 @@ private:
 	void highlighterSettingsColor( bool checked = false );
 	void highlighterSettingsWidth( double value );
 
+	void serverSettingsLoad();
+
 	QHash< QString, QVariant > m_settings;
 };
 

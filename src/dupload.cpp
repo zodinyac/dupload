@@ -230,7 +230,7 @@ void dUpload::load( const QByteArray &arr, const QString &type, const QString &f
 	}
 
 	QByteArray data;
-	QNetworkRequest request( QUrl( "http://vfc.cc/upload.php" ) );
+	QNetworkRequest request( QUrl( QString( "http://%1/upload.php" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ) ) );
 
 	QString author;
 	if ( gallery.isEmpty() )
@@ -346,7 +346,7 @@ void dUpload::finished( QNetworkReply *reply )
 
 		if ( !dSettings::instance()->get( "s2fEnabled", false ) )
 		{
-			m_link = "http://vfc.cc/" + m_filename;
+			m_link = QString( "http://%1/%2" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ).arg( m_filename );
 		}
 		else
 		{

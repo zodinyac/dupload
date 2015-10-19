@@ -72,7 +72,7 @@ dLast::dLast( dUpload *d ) : m_dupload( d ), QDialog( d )
 		}
 	);
 
-	m_netman.get( QNetworkRequest( "http://vfc.cc/last/" + m_dupload->passkey() + "&json" ) );
+	m_netman.get( QNetworkRequest( "http://" + dSettings::instance()->get< QString >( "serverAddress" ) + "/last/" + m_dupload->passkey() + "&json" ) );
 
 	show();
 }

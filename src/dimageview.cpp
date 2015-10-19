@@ -16,13 +16,14 @@
 #include <QtGui/QMouseEvent>
 
 #include "dimageview.h"
+#include "dsettings.h"
 
 dImageView::dImageView( const QString &id, QWidget *parent ) : QLabel( parent )
 {
-	m_image = "http://vfc.cc/" + id;
+	m_image = QString( "http://%1/%2" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ).arg( id );
 
 	connect( &m_netman, SIGNAL( finished( QNetworkReply * ) ), this, SLOT( finished( QNetworkReply * ) ) );
-	m_netman.get( QNetworkRequest( QUrl( "http://vfc.cc/t_" + id ) ) );
+	m_netman.get( QNetworkRequest( QUrl( QString( "http://%1/t%2" ).arg( dSettings::instance()->get< QString >( "serverAddress" ) ).arg( id ) ) ) );
 
 	setAlignment( Qt::AlignHCenter );
 	setCursor( Qt::PointingHandCursor );
