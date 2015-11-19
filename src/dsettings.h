@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012-2013 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012-2013, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -57,6 +57,9 @@ private:
 	void highlighterSettingsLoad();
 	void highlighterSettingsColor( bool checked = false );
 	void highlighterSettingsWidth( double value );
+
+	void screenSettingsLoad();
+	void screenSettingsRadio( bool checked = false );
 
 	void serverSettingsLoad();
 

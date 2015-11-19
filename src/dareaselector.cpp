@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -14,6 +14,7 @@
 *****************************************************************************/
 
 #include "dareaselector.h"
+#include "ddesktopmanager.h"
 
 dAreaSelector::dAreaSelector( dUpload *d ) : m_dupload( d )
 {
@@ -22,7 +23,14 @@ dAreaSelector::dAreaSelector( dUpload *d ) : m_dupload( d )
 
 	m_processSelection = false;
 
-	m_backgroundPixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
+	QScreen *screen = dDesktopManager::instance()->getPrimaryScreenAS();
+
+	m_backgroundPixmap = dDesktopManager::instance()->makeScreenshot( screen );
+	if ( m_backgroundPixmap.isNull() )
+	{
+		close();
+		return;
+	}
 	m_pixmap = m_backgroundPixmap;
 
 	QPainter painter( &m_backgroundPixmap );
@@ -35,6 +43,7 @@ dAreaSelector::dAreaSelector( dUpload *d ) : m_dupload( d )
 	setWindowState( Qt::WindowFullScreen );
 	setCursor( Qt::CrossCursor );
 
+	move( dDesktopManager::instance()->getScreenCoord( screen ) );
 	show();
 }
 

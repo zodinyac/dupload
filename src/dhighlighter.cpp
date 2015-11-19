@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2010, 2012-2013 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2010, 2012-2013, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -15,6 +15,7 @@
 
 #include <QtGui/QPainterPath>
 
+#include "ddesktopmanager.h"
 #include "dhighlighter.h"
 #include "dsettings.h"
 
@@ -30,12 +31,22 @@ dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 		pixmap.load( QApplication::clipboard()->mimeData()->urls()[0].toLocalFile() );
 
 	if ( pixmap.isNull() )
-		pixmap = QPixmap::grabWindow( QApplication::desktop()->winId() );
+	{
+		pixmap = dDesktopManager::instance()->makeScreenshot();
+	}
+
+	if ( pixmap.isNull() )
+	{
+		close();
+		return;
+	}
 
 	ui.image->setPixmap( pixmap );
 	
 	m_lastPos = QPoint( -1, -1 );
 
+	QPoint window_pos = dDesktopManager::instance()->getScreenCoord( dDesktopManager::instance()->getPrimaryScreen() );
+	move( window_pos );
 	showMaximized();
 
 	#if defined( Q_WS_X11 )

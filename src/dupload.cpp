@@ -20,6 +20,7 @@
 #endif
 
 #include "dupload.h"
+#include "ddesktopmanager.h"
 
 dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 {
@@ -465,13 +466,23 @@ void dUpload::hotKeyPressed( quint32 k )
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+V" ) )
 		show();
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+S" ) )
-		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
+	{
+		QImage image = dDesktopManager::instance()->makeScreenshot().toImage();
+		if ( !image.isNull() )
+		{
+			QApplication::clipboard()->setImage( image );
+		}
+	}
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+E" ) )
 		new dHighlighter( this );
 	else if ( k == dGlobalHotKey::instance()->id( "Alt+A" ) )
 	{
-		QApplication::clipboard()->setImage( QPixmap::grabWindow( QApplication::desktop()->winId() ).toImage() );
-		sendFromClipboard( 2 );
+		QImage image = dDesktopManager::instance()->makeScreenshot().toImage();
+		if ( !image.isNull() )
+		{
+			QApplication::clipboard()->setImage( image );
+			sendFromClipboard( 2 );
+		}
 	}
 	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+S" ) )
 	{

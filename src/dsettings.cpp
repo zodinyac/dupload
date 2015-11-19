@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2012-2013 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2012-2013, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -14,6 +14,7 @@
 *****************************************************************************/
 
 #include "dsettings.h"
+#include "ddesktopmanager.h"
 
 dSettings::dSettings()
 {
@@ -154,6 +155,18 @@ void dSettings::show( int index )
 		}
 	);
 
+	// screens
+	connect( m_settingsUi.screen_src_primary, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+	connect( m_settingsUi.screen_src_cursor, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+	connect( m_settingsUi.screen_src_ask, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+	connect( m_settingsUi.screen_src_concat, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+
+	connect( m_settingsUi.screen_as_primary, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+	connect( m_settingsUi.screen_as_cursor, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+	connect( m_settingsUi.screen_as_ask, &QRadioButton::clicked, this, &dSettings::screenSettingsRadio );
+
+	screenSettingsLoad();
+
 	m_settingsDialog->show();
 }
 
@@ -231,6 +244,76 @@ void dSettings::highlighterSettingsWidth( double value )
 	set( name, value );
 
 	highlighterSettingsLoad();
+}
+
+void dSettings::screenSettingsLoad()
+{
+	int source = dSettings::instance()->get< int >( "screen_src", dDesktopManager::DDM_PRIMARY );
+	if ( source == dDesktopManager::DDM_PRIMARY )
+	{
+		m_settingsUi.screen_src_primary->setChecked( true );
+	}
+	else if ( source == dDesktopManager::DDM_CURSOR )
+	{
+		m_settingsUi.screen_src_cursor->setChecked( true );
+	}
+	else if ( source == dDesktopManager::DDM_ASK )
+	{
+		m_settingsUi.screen_src_ask->setChecked( true );
+	}
+	else if ( source == dDesktopManager::DDM_CONCAT )
+	{
+		m_settingsUi.screen_src_concat->setChecked( true );
+	}
+
+	int source_as = dSettings::instance()->get< int >( "screen_as", dDesktopManager::DDM_PRIMARY );
+	if ( source_as == dDesktopManager::DDM_PRIMARY )
+	{
+		m_settingsUi.screen_as_primary->setChecked( true );
+	}
+	else if ( source_as == dDesktopManager::DDM_CURSOR )
+	{
+		m_settingsUi.screen_as_cursor->setChecked( true );
+	}
+	else if ( source_as == dDesktopManager::DDM_ASK )
+	{
+		m_settingsUi.screen_as_ask->setChecked( true );
+	}
+}
+
+void dSettings::screenSettingsRadio( bool checked )
+{
+	QRadioButton *radio = qobject_cast< QRadioButton * >(sender());
+
+	QString name = radio->objectName();
+	if ( name == "screen_src_primary" )
+	{
+		set< int >( "screen_src", dDesktopManager::DDM_PRIMARY );
+	}
+	else if ( name == "screen_src_cursor" )
+	{
+		set< int >( "screen_src", dDesktopManager::DDM_CURSOR );
+	}
+	else if ( name == "screen_src_ask" )
+	{
+		set< int >( "screen_src", dDesktopManager::DDM_ASK );
+	}
+	else if ( name == "screen_src_concat" )
+	{
+		set< int >( "screen_src", dDesktopManager::DDM_CONCAT );
+	}
+	else if ( name == "screen_as_primary" )
+	{
+		set< int >( "screen_as", dDesktopManager::DDM_PRIMARY );
+	}
+	else if ( name == "screen_as_cursor" )
+	{
+		set< int >( "screen_as", dDesktopManager::DDM_CURSOR );
+	}
+	else if ( name == "screen_as_ask" )
+	{
+		set< int >( "screen_as", dDesktopManager::DDM_ASK );
+	}
 }
 
 void dSettings::serverSettingsLoad()
