@@ -25,7 +25,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 {
 	ui.setupUi( this );
 	ui.progress->setVisible( false );
-	move( qApp->desktop()->geometry().center() - rect().center() );
+	move( qApp->desktop()->screenGeometry().center() - rect().center() );
 
 	m_icon.addFile( ":/dUpload.ico" );
 	setWindowIcon( m_icon );
