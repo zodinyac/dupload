@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2012, 2015 by Belov Nikita <null@deltaz.org>
+ *                      2015 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -22,6 +23,7 @@ dAreaSelector::dAreaSelector( dUpload *d ) : m_dupload( d )
 	setAttribute( Qt::WA_QuitOnClose, false );
 
 	m_processSelection = false;
+	m_haveSelection = false;
 
 	QScreen *screen = dDesktopManager::instance()->getPrimaryScreenAS();
 
@@ -69,19 +71,30 @@ void dAreaSelector::keyPressEvent( QKeyEvent *event )
 
 	if ( key == m_dupload->nativeKeycode( 'B' ) )
 	{
-		QApplication::clipboard()->setImage( m_pixmap.copy( m_selection ).toImage() );
+		prepareImage();
 		m_dupload->sendFromClipboard();
 		close();
 	}
+	else if ( key == m_dupload->nativeKeycode( 'S' ) && m_haveSelection)
+	{
+		m_selections.append( m_selection );
+		m_haveSelection = false;
+		update();
+	}
+	else if ( key == m_dupload->nativeKeycode( 'D' ) && !m_selections.empty() )
+	{
+		m_selections.pop_back();
+		update();
+	}
 	else if ( key == m_dupload->nativeKeycode( 'N' ) )
 	{
-		QApplication::clipboard()->setImage( m_pixmap.copy( m_selection ).toImage() );
+		prepareImage();
 		m_dupload->sendFromClipboard( 1 );
 		close();
 	}
 	else if ( key == m_dupload->nativeKeycode( 'C' ) )
 	{
-		QApplication::clipboard()->setImage( m_pixmap.copy( m_selection ).toImage() );
+		prepareImage();
 		close();
 	}
 	else if ( event->key() == Qt::Key_Escape )
@@ -94,6 +107,7 @@ void dAreaSelector::mousePressEvent( QMouseEvent *event )
 {
 	m_startPos = event->pos();
 	m_processSelection = true;
+	m_haveSelection = true;
 }
 
 void dAreaSelector::mouseMoveEvent( QMouseEvent *event )
@@ -115,7 +129,39 @@ void dAreaSelector::mouseReleaseEvent( QMouseEvent *event )
 
 void dAreaSelector::drawSelection( QPainter &painter )
 {
-	painter.drawPixmap( m_selection, m_pixmap, m_selection );
-	painter.setPen( QPen( QBrush( QColor( 0, 0, 0, 255 ) ), 2 ) );
-	painter.drawRect( m_selection );
+	for ( QRect selection : m_selections )
+		painter.drawPixmap( selection, m_pixmap, selection );
+
+	if ( m_haveSelection )
+	{
+		painter.drawPixmap( m_selection, m_pixmap, m_selection );
+		painter.setPen( QPen( QBrush( QColor( 0, 0, 0, 255 ) ), 2 ) );
+		painter.drawRect( m_selection );
+	}
+}
+
+void dAreaSelector::prepareImage()
+{
+	if ( !m_haveSelection && m_selections.empty() )
+	{
+		QApplication::clipboard()->setImage( m_pixmap.toImage() );
+	}
+	else
+	{
+		if ( m_haveSelection )
+		{
+			m_selections.append( m_selection );
+		}
+		m_selection = m_selections[0];
+		for ( QRect selection : m_selections )
+			m_selection = m_selection.united( selection );
+
+		QPixmap canvas = QPixmap( m_pixmap.size() );
+		canvas.fill( Qt::black );
+		QPainter p( &canvas );
+		for ( QRect selection : m_selections )
+			p.drawPixmap( selection, m_pixmap, selection );
+
+		QApplication::clipboard()->setImage( canvas.copy( m_selection ).toImage() );
+	}
 }
