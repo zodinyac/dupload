@@ -132,7 +132,7 @@ void dAreaSelector::drawSelection( QPainter &painter )
 	for ( QRect selection : m_selections )
 		painter.drawPixmap( selection, m_pixmap, selection );
 
-	if (m_haveSelection)
+	if ( m_haveSelection )
 	{
 		painter.drawPixmap( m_selection, m_pixmap, m_selection );
 		painter.setPen( QPen( QBrush( QColor( 0, 0, 0, 255 ) ), 2 ) );

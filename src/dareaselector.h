@@ -50,7 +50,7 @@ private:
 	QPoint m_endPos;
 
 	QRect m_selection;
-    QVector<QRect> m_selections;
+	QVector<QRect> m_selections;
 
 	bool m_processSelection;
 	bool m_haveSelection;
