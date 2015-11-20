@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2012 by Belov Nikita <null@deltaz.org>
+ *                2015 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -39,6 +40,7 @@ protected:
 
 private:
 	void drawSelection( QPainter &painter );
+	void prepareImage();
 	dUpload *m_dupload;
 
 	QPixmap m_backgroundPixmap;
@@ -48,8 +50,10 @@ private:
 	QPoint m_endPos;
 
 	QRect m_selection;
+    QVector<QRect> m_selections;
 
 	bool m_processSelection;
+	bool m_haveSelection;
 };
 
 #endif // DAREASELECTOR_H
