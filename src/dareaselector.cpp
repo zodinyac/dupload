@@ -77,7 +77,7 @@ void dAreaSelector::keyPressEvent( QKeyEvent *event )
 	}
 	else if ( key == m_dupload->nativeKeycode( 'S' ) && m_haveSelection)
 	{
-		m_selections.append( m_selection );
+		m_selections.append( qMakePair( m_selection, m_selectionType ) );
 		m_haveSelection = false;
 		update();
 	}
@@ -107,16 +107,17 @@ void dAreaSelector::mousePressEvent( QMouseEvent *event )
 {
 	m_startPos = event->pos();
 	m_processSelection = true;
-	m_haveSelection = true;
 }
 
 void dAreaSelector::mouseMoveEvent( QMouseEvent *event )
 {
-	if( !( event->buttons() & Qt::LeftButton ) || !m_processSelection )
+	if( !( event->buttons() & ( Qt::LeftButton | Qt::RightButton ) ) || !m_processSelection )
 		return;
 
 	m_endPos = event->pos();
 	m_selection = QRect( m_startPos, m_endPos ).normalized();
+	m_haveSelection = true;
+	m_selectionType = ( event->buttons() & Qt::LeftButton ) ? DAS_ADD : DAS_DELETE;
 
 	update();
 }
@@ -129,39 +130,71 @@ void dAreaSelector::mouseReleaseEvent( QMouseEvent *event )
 
 void dAreaSelector::drawSelection( QPainter &painter )
 {
-	for ( QRect selection : m_selections )
-		painter.drawPixmap( selection, m_pixmap, selection );
+	for ( auto selection : m_selections )
+	{
+		painter.drawPixmap( selection.first, m_pixmap, selection.first );
+		if ( selection.second == DAS_DELETE )
+		{
+			painter.fillRect( selection.first, QBrush( QColor( 0, 0, 0, 85 ) ) );
+		}
+	}
 
 	if ( m_haveSelection )
 	{
 		painter.drawPixmap( m_selection, m_pixmap, m_selection );
-		painter.setPen( QPen( QBrush( QColor( 0, 0, 0, 255 ) ), 2 ) );
+		if ( m_selectionType == DAS_ADD )
+		{
+			painter.setBrush( QBrush( Qt::transparent ) );
+		}
+		else
+		{
+			painter.setBrush( QBrush( QColor( 0, 0, 0, 85 ) ) );
+		}
+		painter.setPen( QPen( QBrush( Qt::black ), 2 ) );
 		painter.drawRect( m_selection );
 	}
 }
 
 void dAreaSelector::prepareImage()
 {
-	if ( !m_haveSelection && m_selections.empty() )
+	if ( m_haveSelection )
 	{
-		QApplication::clipboard()->setImage( m_pixmap.toImage() );
+		m_selections.append( qMakePair( m_selection, m_selectionType ) );
 	}
-	else
-	{
-		if ( m_haveSelection )
-		{
-			m_selections.append( m_selection );
-		}
-		m_selection = m_selections[0];
-		for ( QRect selection : m_selections )
-			m_selection = m_selection.united( selection );
 
+	QRect final_selection;
+	bool found = false;
+	for ( auto selection : m_selections )
+	{
+		if ( selection.second == DAS_ADD )
+		{
+			final_selection = selection.first;
+			found = true;
+			break;
+		}
+	}
+
+	if ( found )
+	{
 		QPixmap canvas = QPixmap( m_pixmap.size() );
 		canvas.fill( Qt::black );
 		QPainter p( &canvas );
-		for ( QRect selection : m_selections )
-			p.drawPixmap( selection, m_pixmap, selection );
-
-		QApplication::clipboard()->setImage( canvas.copy( m_selection ).toImage() );
+		for ( auto selection : m_selections )
+		{
+			if ( selection.second == DAS_ADD )
+			{
+				final_selection = final_selection.united( selection.first );
+				p.drawPixmap( selection.first, m_pixmap, selection.first );
+			}
+			else
+			{
+				p.fillRect( selection.first, QBrush( Qt::black ) );
+			}
+		}
+		QApplication::clipboard()->setImage( canvas.copy( final_selection ).toImage() );
+	}
+	else
+	{
+		QApplication::clipboard()->setImage( m_pixmap.toImage() );
 	}
 }
