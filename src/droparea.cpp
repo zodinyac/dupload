@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2009, 2012-2013 by Belov Nikita <null@deltaz.org>
+ *                           2015 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -17,9 +18,10 @@
 
 dropArea::dropArea( dUpload *d ) : m_dupload( d ), QLabel( d )
 {
-    setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    setAlignment( Qt::AlignCenter );
-    setAcceptDrops( true );
+	setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+	setStyleSheet( "dropArea { border-style: none; }" );
+	setAlignment( Qt::AlignCenter );
+	setAcceptDrops( true );
 
 	auto effect = new QGraphicsDropShadowEffect();
 
