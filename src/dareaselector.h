@@ -49,8 +49,15 @@ private:
 	QPoint m_startPos;
 	QPoint m_endPos;
 
+	enum DAS
+	{
+		DAS_ADD,
+		DAS_DELETE
+	};
+
 	QRect m_selection;
-	QVector<QRect> m_selections;
+	DAS m_selectionType;
+	QVector< QPair< QRect, DAS > > m_selections;
 
 	bool m_processSelection;
 	bool m_haveSelection;
