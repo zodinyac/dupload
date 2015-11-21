@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2009-2010, 2012-2013, 2015 by Belov Nikita <null@deltaz.org>
+ *                                      2015 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -32,6 +33,7 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 	setWindowIcon( m_icon );
 
 	droparea = new dropArea( this );
+	droparea->setStyleSheet(" border-style: none; ");
 	connect( droparea, SIGNAL( changed( const QString &, const QString & ) ), this, SLOT( changed( const QString &, const QString & ) ) );
 	connect( droparea, SIGNAL( clicked() ), this, SLOT( clicked() ) );
 	ui.layout->addWidget( droparea, 0, 0 );
