@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2009, 2012-2013 by Belov Nikita <null@deltaz.org>
+ *                           2015 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -17,9 +18,9 @@
 
 dropArea::dropArea( dUpload *d ) : m_dupload( d ), QLabel( d )
 {
-    setFrameStyle( QFrame::Sunken | QFrame::NoFrame );
-    setAlignment( Qt::AlignCenter );
-    setAcceptDrops( true );
+	setFrameStyle( QFrame::Sunken | QFrame::NoFrame );
+	setAlignment( Qt::AlignCenter );
+	setAcceptDrops( true );
 
 	auto effect = new QGraphicsDropShadowEffect();
 
@@ -72,7 +73,22 @@ void dropArea::dragEnterEvent( QDragEnterEvent *event )
 			foreach( QUrl url, event->mimeData()->urls() )
 				c += QFileInfo( url.toLocalFile() ).size();
 
-			settext( QString::number( c ) );
+			if (c > 1 << 30)
+			{
+				settext( QString::number( c >> 30 ).append( "\nGiB" ) );
+			}
+			else if (c > 1 << 20)
+			{
+				settext( QString::number( c >> 20 ).append( "\nMiB" ) );
+			}
+			else if (c > 1 << 10)
+			{
+				settext( QString::number( c >> 10 ).append( "\nKiB" ) );
+			}
+			else
+			{
+				settext( QString::number( c ).append( "\nBytes" ) );
+			}
 		}
 	}
 	event->acceptProposedAction();
