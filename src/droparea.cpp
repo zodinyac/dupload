@@ -17,7 +17,7 @@
 
 dropArea::dropArea( dUpload *d ) : m_dupload( d ), QLabel( d )
 {
-    setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    setFrameStyle( QFrame::Sunken | QFrame::NoFrame );
     setAlignment( Qt::AlignCenter );
     setAcceptDrops( true );
 
