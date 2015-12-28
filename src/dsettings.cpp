@@ -318,7 +318,7 @@ void dSettings::screenSettingsRadio( bool checked )
 
 void dSettings::serverSettingsLoad()
 {
-	QFile server( "./server.txt" );
+	QFile server( QApplication::applicationDirPath() + "/server.txt" );
 	if ( server.exists() && server.open( QIODevice::ReadOnly | QIODevice::Text ) )
 	{
 		QTextStream in( &server );

@@ -359,7 +359,7 @@ void dUpload::finished( QNetworkReply *reply )
 		droparea->setToolTip( "Click here for copy link to clipboard\n" + m_link );
 		m_trayicon->message( m_link );
 
-		QFile last( "./last.txt" );
+		QFile last( QApplication::applicationDirPath() + "/last.txt" );
 		if ( last.exists() && last.open( QIODevice::Append | QIODevice::Text ) )
 		{
 			QTextStream out( &last );
