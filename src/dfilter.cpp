@@ -85,7 +85,7 @@ void dFilter::resizeEvent(QResizeEvent *event)
 
 void dFilter::loadFilters()
 {
-	std::vector<dFilterAbstract *> filters = {
+	static std::vector<dFilterAbstract *> filters = {
 		new dFilterAbstract(),
 		new dFilterMonochrome()
 	};
