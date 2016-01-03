@@ -57,16 +57,17 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	dExternal::instance( this );
 
-	dGlobalHotKey::instance()->shortcut( "Alt+B" );
-	dGlobalHotKey::instance()->shortcut( "Alt+N" );
-	dGlobalHotKey::instance()->shortcut( "Alt+V" );
-	dGlobalHotKey::instance()->shortcut( "Alt+S" );
-	dGlobalHotKey::instance()->shortcut( "Alt+E" );
-	dGlobalHotKey::instance()->shortcut( "Alt+A" );
-	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+S" );
-	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+W" );
-	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+S" );
-	dGlobalHotKey::instance()->shortcut( "Ctrl+Shift+Alt+F" );
+	dGlobalHotKey::instance()->shortcut("Alt+B");
+	dGlobalHotKey::instance()->shortcut("Alt+N");
+	dGlobalHotKey::instance()->shortcut("Alt+V");
+	dGlobalHotKey::instance()->shortcut("Alt+S");
+	dGlobalHotKey::instance()->shortcut("Alt+E");
+	dGlobalHotKey::instance()->shortcut("Alt+A");
+	dGlobalHotKey::instance()->shortcut("Ctrl+Shift+S");
+	dGlobalHotKey::instance()->shortcut("Ctrl+Shift+W");
+	dGlobalHotKey::instance()->shortcut("Ctrl+Shift+F");
+	dGlobalHotKey::instance()->shortcut("Ctrl+Shift+Alt+S");
+	dGlobalHotKey::instance()->shortcut("Ctrl+Shift+Alt+F");
 
 	connect( dGlobalHotKey::instance(), SIGNAL( hotKeyPressed( quint32 ) ), this, SLOT( hotKeyPressed( quint32 ) ) );
 
@@ -459,71 +460,51 @@ void dUpload::keyPressEvent( QKeyEvent *event )
 
 void dUpload::hotKeyPressed( quint32 k )
 {
-	if ( k == dGlobalHotKey::instance()->id( "Alt+B" ) )
+	if (k == dGlobalHotKey::instance()->id("Alt+B")) {
 		sendFromClipboard();
-	else if ( k == dGlobalHotKey::instance()->id( "Alt+N" ) )
-		sendFromClipboard( 1 );
-	else if ( k == dGlobalHotKey::instance()->id( "Alt+V" ) )
+	} else if (k == dGlobalHotKey::instance()->id("Alt+N")) {
+		sendFromClipboard(1);
+	} else if (k == dGlobalHotKey::instance()->id("Alt+V")) {
 		show();
-	else if ( k == dGlobalHotKey::instance()->id( "Alt+S" ) )
-	{
+	} else if (k == dGlobalHotKey::instance()->id("Alt+S")) {
 		QImage image = dDesktopManager::instance()->makeScreenshot().toImage();
-		if ( !image.isNull() )
-		{
-			QApplication::clipboard()->setImage( image );
+		if (!image.isNull()) {
+			QApplication::clipboard()->setImage(image);
 		}
-	}
-	else if ( k == dGlobalHotKey::instance()->id( "Alt+E" ) )
-		new dHighlighter( this );
-	else if ( k == dGlobalHotKey::instance()->id( "Alt+A" ) )
-	{
+	} else if (k == dGlobalHotKey::instance()->id("Alt+E")) {
+		new dHighlighter(this);
+	} else if (k == dGlobalHotKey::instance()->id("Alt+A")) {
 		QImage image = dDesktopManager::instance()->makeScreenshot().toImage();
-		if ( !image.isNull() )
-		{
-			QApplication::clipboard()->setImage( image );
-			sendFromClipboard( 2 );
+		if (!image.isNull()) {
+			QApplication::clipboard()->setImage(image);
+			sendFromClipboard(2);
 		}
-	}
-	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+S" ) )
-	{
-		if ( m_dareaselector )
-		{
+	} else if (k == dGlobalHotKey::instance()->id("Ctrl+Shift+S")) {
+		if (m_dareaselector) {
 			m_dareaselector->activateWindow();
+		} else {
+			m_dareaselector = new dAreaSelector(this);
 		}
-		else
-		{
-			m_dareaselector = new dAreaSelector( this );
-		}
-	}
-	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+W" ) )
-	{
-		if ( m_dwebcam )
-		{
+	} else if (k == dGlobalHotKey::instance()->id("Ctrl+Shift+W")) {
+		if (m_dwebcam) {
 			m_dwebcam->activateWindow();
-		}
-		else if ( !m_webcam_creating )
-		{
+		} else if (!m_webcam_creating) {
 			m_webcam_creating = true;
-			m_dwebcam = new dWebCam( this );
+			m_dwebcam = new dWebCam(this);
 			m_webcam_creating = false;
 		}
-	}
-	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+Alt+S" ) )
-	{
+	} else if (k == dGlobalHotKey::instance()->id("Ctrl+Shift+F")) {
+		new dFilter(this);
+	} else if (k == dGlobalHotKey::instance()->id("Ctrl+Shift+Alt+S")) {
 		dSettings::instance()->show();
-	}
-	else if ( k == dGlobalHotKey::instance()->id( "Ctrl+Shift+Alt+F" ) )
-	{
-		bool state = !dSettings::instance()->get( "s2fEnabled", false );
-		dSettings::instance()->set( "s2fEnabled", state );
+	} else if (k == dGlobalHotKey::instance()->id("Ctrl+Shift+Alt+F")) {
+		bool state = !dSettings::instance()->get("s2fEnabled", false);
+		dSettings::instance()->set("s2fEnabled", state);
 
-		if ( state )
-		{
-			notify( "Save to file is enabled" );
-		}
-		else
-		{
-			notify( "Save to file is disabled" );
+		if (state) {
+			notify("Save to file is enabled");
+		} else {
+			notify("Save to file is disabled");
 		}
 	}
 }

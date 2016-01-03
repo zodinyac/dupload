@@ -37,6 +37,7 @@
 #include "dareaselector.h"
 #include "ddll.h"
 #include "dfile.h"
+#include "dfilter.h"
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
@@ -51,6 +52,7 @@ class dHighlighter;
 class dropArea;
 class dWebCam;
 class dAreaSelector;
+class dFilter;
 
 class dUpload : public QWidget, public QAbstractNativeEventFilter
 {
