@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010, 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -68,14 +68,14 @@ bool dGlobalHotKey::nativeEventFilter( const QByteArray &, void *e, long * )
 		MSG *m = ( MSG * ) e;
 
 		if ( m->message == WM_HOTKEY )
-			dGlobalHotKey::instance()->hotKeyPressed( HIWORD( m->lParam ) ^ LOWORD( m->lParam ) );
+			dGlobalHotKey::instance()->hotKeyPressed( id( HIWORD( m->lParam ), LOWORD( m->lParam ) ) );
 	#elif defined( Q_WS_X11 )
 		XEvent *event = ( XEvent * ) e;
 
 		if ( event->type == KeyPress )
 		{
 			XKeyEvent *key = ( XKeyEvent * ) event;
-			dGlobalHotKey::instance()->hotKeyPressed( key->keycode ^ ( key->state & ( ShiftMask | ControlMask | Mod1Mask | Mod4Mask ) ) );
+			dGlobalHotKey::instance()->hotKeyPressed( id( key->keycode, ( key->state & ( ShiftMask | ControlMask | Mod1Mask | Mod4Mask ) ) ) );
 		}
 	#elif defined( Q_WS_MAC )
 		EventRef event = ( EventRef ) e;
@@ -83,8 +83,8 @@ bool dGlobalHotKey::nativeEventFilter( const QByteArray &, void *e, long * )
 		{
 			EventHotKeyID keyID;
 			GetEventParameter( event, kEventParamDirectObject, typeEventHotKeyID, NULL, sizeof( keyID ), NULL, &keyID );
-			Identifier id = keyIDs.key( keyID.id );
-			dGlobalHotKey::instance()->hotKeyPressed( id.second ^ id.first );
+			Identifier key_id = keyIDs.key( keyID.id );
+			dGlobalHotKey::instance()->hotKeyPressed( id( key_id.second ^ key_id.first ) );
 		}
 	#endif
 
@@ -193,7 +193,13 @@ quint32 dGlobalHotKey::id( const QString &s )
 	quint32 key, mods;
 	native( s, key, mods );
 
-	return mods ^ key;
+	// It's a right sequence of parameters.
+	return id(key, mods);
+}
+
+quint32 dGlobalHotKey::id(quint32 mods, quint32 key)
+{
+	return (mods << 16) | key;
 }
 
 #if defined( Q_WS_WIN )

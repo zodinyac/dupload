@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2009-2010, 2012 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2009-2010, 2012, 2015 by Belov Nikita <null@deltaz.org>
  *
  ***************************************************************************
  *                                                                         *
@@ -45,6 +45,7 @@ public:
 
 	bool shortcut( const QString &s, bool a = true );
 	quint32 id( const QString &s );
+	quint32 id(quint32 mods, quint32 key);
 
 	void native( const QString &s, quint32 &k, quint32 &m );
 
