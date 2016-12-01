@@ -170,14 +170,6 @@ void dSettings::show( int index )
 	m_settingsDialog->show();
 }
 
-template < class T >
-void dSettings::set( const QString &key, const T &value )
-{
-	m_settings.insert( key, QVariant::fromValue( value ) );
-
-	emit settingsChanged();
-}
-
 int dSettings::remove( const QString &key )
 {
 	return m_settings.remove( key );

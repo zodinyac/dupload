@@ -39,7 +39,11 @@ public:
 	}
 
 	template < class T >
-	void set( const QString &key, const T &value );
+	void set( const QString &key, const T &value )
+	{
+		m_settings.insert( key, QVariant::fromValue( value ) );
+		emit settingsChanged();
+	}
 
 	int remove( const QString &key );
 
