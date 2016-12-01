@@ -15,6 +15,10 @@
 
 #include "dglobalhotkey.h"
 
+#ifdef Q_WS_X11
+    #include <X11/Xlib.h>
+#endif
+
 dGlobalHotKey::dGlobalHotKey()
 {
     QAbstractEventDispatcher::instance()->installNativeEventFilter( this );

@@ -13,14 +13,16 @@
  ***************************************************************************
 *****************************************************************************/
 
-#include <QtWinExtras>
-
-#ifdef Q_OS_WIN
-#include "shobjidl.h"
-#endif
-
 #include "dupload.h"
 #include "ddesktopmanager.h"
+
+#ifdef Q_OS_WIN
+#include <QtWinExtras>
+#include "shobjidl.h"
+#endif
+#ifdef Q_WS_X11
+#include <X11/Xlib.h>
+#endif
 
 dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 {
@@ -48,8 +50,10 @@ dUpload::dUpload( const QString &file, QWidget *parent ) : QWidget( parent )
 
 	//new dPlayerMpc( this );
 
+#ifdef Q_OS_WIN
 	m_dll = new dDll();
 	connect( dSettings::instance(), &dSettings::settingsChanged, m_dll, &dDll::updateSettings );
+#endif
 
 	m_file = new dFile();
 
@@ -154,6 +158,7 @@ void dUpload::setLink( const QString &link )
 
 void dUpload::aeroBackground()
 {
+#ifdef Q_OS_WIN
 	if ( QtWin::isCompositionEnabled() )
 	{
 		QtWin::extendFrameIntoClientArea( this, -1, -1, -1, -1 );
@@ -167,6 +172,7 @@ void dUpload::aeroBackground()
 		setAttribute( Qt::WA_TranslucentBackground, false );
 		setStyleSheet( QString( "dUpload { background: %1; }" ).arg( QtWin::realColorizationColor().name() ) );
 	}
+#endif
 }
 
 void dUpload::show()
@@ -196,7 +202,9 @@ void dUpload::show( Qt::WindowFlags flags )
 	setWindowFlags( flags );
 	show();
 
+#ifdef Q_OS_WIN
 	m_dll->changeHWND( ( HWND )winId() );
+#endif
 }
 
 void dUpload::changed( const QString &file, const QString &gallery )
@@ -523,16 +531,19 @@ void dUpload::mouseMoveEvent( QMouseEvent *event )
 
 void dUpload::paintEvent( QPaintEvent *event )
 {
+#ifdef Q_OS_WIN
 	if ( QtWin::isCompositionEnabled() )
 	{
 		QPainter p( this );
 		p.setCompositionMode( QPainter::CompositionMode_Clear );
 		p.fillRect( 0, 0, width(), height(), QColor() );
 	}
+#endif
 }
 
 bool dUpload::nativeEventFilter( const QByteArray &eventType, void *event, long *result )
 {
+#ifdef Q_OS_WIN
 	if ( eventType == "windows_generic_MSG" )
 	{
 		MSG *message = ( MSG * )event;
@@ -556,12 +567,14 @@ bool dUpload::nativeEventFilter( const QByteArray &eventType, void *event, long 
 			return enableMP;
 		}
     }
+#endif
 
     return false;
 }
 
 bool dUpload::event( QEvent *event )
 {
+#ifdef Q_OS_WIN
 	if ( event->type() == QEvent::WinIdChange )
 	{
 		m_dll->changeHWND( ( HWND )winId() );
@@ -570,6 +583,7 @@ bool dUpload::event( QEvent *event )
 	{
 		aeroBackground();
 	}
+#endif
 
 	return QWidget::event( event );
 }

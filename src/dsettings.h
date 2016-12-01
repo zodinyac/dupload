@@ -33,9 +33,9 @@ public:
 	void show( int index = 0 );
 
 	template < class T >
-	inline T get( const QString &key, const T &default = T() )
+	inline T get( const QString &key, const T &default_value = T() )
 	{
-		return m_settings.value( key, QVariant::fromValue( default ) ).value< T >();
+		return m_settings.value( key, QVariant::fromValue( default_value ) ).template value< T >();
 	}
 
 	template < class T >

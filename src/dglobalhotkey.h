@@ -27,7 +27,6 @@
 	#include <windows.h>
 #elif defined( Q_WS_X11 )
 	#include <QX11Info>
-	#include <X11/Xlib.h>
 #elif defined( Q_WS_MAC )
 	#include <Carbon/Carbon.h>
 #endif

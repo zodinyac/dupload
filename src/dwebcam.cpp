@@ -13,9 +13,8 @@
  ***************************************************************************
 *****************************************************************************/
 
-#include <QtWinExtras>
-
 #ifdef Q_OS_WIN
+#include <QtWinExtras>
 #include "shobjidl.h"
 #endif
 
@@ -271,6 +270,7 @@ void dWebCam::cameraStateChanged( QCamera::State state )
 
 void dWebCam::aeroBackground()
 {
+#ifdef Q_OS_WIN
 	if ( QtWin::isCompositionEnabled() )
 	{
 		QtWin::extendFrameIntoClientArea( this, -1, -1, -1, -1 );
@@ -284,14 +284,17 @@ void dWebCam::aeroBackground()
 		setAttribute( Qt::WA_TranslucentBackground, false );
 		setStyleSheet( QString( "dWebCam { background: %1; }" ).arg( QtWin::realColorizationColor().name() ) );
 	}
+#endif
 }
 
 bool dWebCam::event( QEvent *event )
 {
+#ifdef Q_OS_WIN
 	if ( event->type() == QWinEvent::CompositionChange || event->type() == QWinEvent::ColorizationChange )
 	{
 		aeroBackground();
 	}
+#endif
 
 	return QWidget::event( event );
 }
@@ -310,12 +313,15 @@ void dWebCam::mouseMoveEvent( QMouseEvent *event )
 
 void dWebCam::paintEvent( QPaintEvent *event )
 {
+
+#ifdef Q_OS_WIN
 	if ( QtWin::isCompositionEnabled() )
 	{
 		QPainter p( this );
 		p.setCompositionMode( QPainter::CompositionMode_Clear );
 		p.fillRect( 0, 0, width(), height(), QColor() );
 	}
+#endif
 }
 
 void dWebCam::resizeEvent( QResizeEvent *event )

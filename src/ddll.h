@@ -16,6 +16,7 @@
 #ifndef DDLL_H
 #define DDLL_H
 
+#ifdef Q_OS_WIN
 #define NOMINMAX
 #include <windows.h>
 
@@ -53,5 +54,6 @@ private:
 	QLibrary m_dUploadDll;
 	HWND m_hwnd;
 };
+#endif
 
 #endif // DDLL_H

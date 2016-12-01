@@ -51,7 +51,7 @@ dLast::dLast( dUpload *d ) : m_dupload( d ), QDialog( d )
 					ui.mainLabel->setText( "<p align=\"center\"><span style=\"font-size: 0.8em; font-family:Lucida,sans-serif; font-weight:800;\">Click on image for copy link to clipboard</span></p>" );
 
 					QJsonArray images = json_doc.array();
-					for ( auto &image : images )
+					for ( auto image : images )
 					{
 						QJsonObject object = image.toObject();
 

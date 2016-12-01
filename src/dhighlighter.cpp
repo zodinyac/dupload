@@ -19,6 +19,10 @@
 #include "dhighlighter.h"
 #include "dsettings.h"
 
+#ifdef Q_WS_X11
+#include <X11/Xlib.h>
+#endif
+
 dHighlighter::dHighlighter( dUpload *d ) : m_dupload( d )
 {
 	ui.setupUi( this );

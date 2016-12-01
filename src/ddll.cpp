@@ -9,10 +9,11 @@
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
- *                                                                         *
+ *                  m_dll                                                       *
  ***************************************************************************
 *****************************************************************************/
 
+#ifdef Q_OS_WIN
 #include "ddll.h"
 #include "dSettings.h"
 
@@ -63,3 +64,4 @@ void dDll::updateSettings()
 		addWatchingApp( app.toStdWString().c_str() );
 	}
 }
+#endif

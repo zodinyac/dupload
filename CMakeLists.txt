@@ -11,11 +11,17 @@ find_package( Qt5Multimedia REQUIRED )
 find_package( Qt5MultimediaWidgets REQUIRED )
 find_package( Qt5Network REQUIRED )
 find_package( Qt5Widgets REQUIRED )
-find_package( Qt5WinExtras REQUIRED )
+if( WIN32 )
+    find_package( Qt5WinExtras REQUIRED )
+else( WIN32 )
+    find_package( Qt5X11Extras REQUIRED )
+endif( WIN32 )
 
 file( GLOB dUpload_INCLUDES "src/*.h" )
 file( GLOB dUpload_SOURCES "src/*.cpp" )
 file( GLOB dUpload_UI "ui/*.ui" )
+
+include_directories("src/" ${LLVM_INCLUDE_DIRS} "${CLANG_INSTALL_PREFIX}/include/clang")
 
 QT5_ADD_RESOURCES( dUpload_RESOURCES "resources/dUpload.qrc" )
 QT5_WRAP_UI( dUpload_UI_SOURCES ${dUpload_UI} )
@@ -25,11 +31,23 @@ if( WIN32 )
     add_definitions( -DUNICODE -D_UNICODE )
 	list( APPEND dUpload_RESOURCES "resources/dUpload.rc" )
 #	set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/" )
+else ( WIN32 )
+    add_definitions( -DQ_WS_X11 )
 endif( WIN32 )
 
 add_executable( dUpload WIN32 MACOSX_BUNDLE ${dUpload_INCLUDES} ${dUpload_SOURCES} ${dUpload_UI_SOURCES} ${dUpload_RESOURCES} )
+set_target_properties(dUpload PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+)
 
-target_link_libraries( dUpload Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Network Qt5::Widgets Qt5::WinExtras )
+target_link_libraries( dUpload Qt5::Core Qt5::Gui Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Network Qt5::Widgets )
+if( WIN32 )
+    target_link_libraries( dUpload Qt5::WinExtras )
+else( WIN32 )
+    target_link_libraries( dUpload Qt5::X11Extras X11 )
+endif( WIN32 )
 
 if( APPLE )
 	#SET( MACOSX_BUNDLE_ICON_FILE Speedcrunch.icns )

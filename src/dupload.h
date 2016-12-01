@@ -113,7 +113,9 @@ private:
 
 	dTrayIcon *m_trayicon;
 
+#ifdef Q_OS_WIN
 	dDll *m_dll;
+#endif
 	dFile *m_file;
 
 	QIcon m_icon;
