@@ -15,8 +15,11 @@
 
 #include "dglobalhotkey.h"
 
+#include <QDebug>
+
 #ifdef Q_WS_X11
     #include <X11/Xlib.h>
+    #include <xcb/xcb.h>
 #endif
 
 dGlobalHotKey::dGlobalHotKey()
@@ -66,7 +69,7 @@ OSStatus qxt_mac_handle_hot_key( EventHandlerCallRef /* nextHandler */, EventRef
 
 #endif
 
-bool dGlobalHotKey::nativeEventFilter( const QByteArray &, void *e, long * )
+bool dGlobalHotKey::nativeEventFilter( const QByteArray &eventType, void *e, long * )
 {
 	#if defined( Q_WS_WIN )
 		MSG *m = ( MSG * ) e;
@@ -74,13 +77,28 @@ bool dGlobalHotKey::nativeEventFilter( const QByteArray &, void *e, long * )
 		if ( m->message == WM_HOTKEY )
 			dGlobalHotKey::instance()->hotKeyPressed( id( HIWORD( m->lParam ), LOWORD( m->lParam ) ) );
 	#elif defined( Q_WS_X11 )
-		XEvent *event = ( XEvent * ) e;
+        xcb_key_press_event_t *kev = 0;
+        if (eventType == "xcb_generic_event_t") {
+            xcb_generic_event_t *ev = static_cast<xcb_generic_event_t *>(e);
+            if ((ev->response_type & 127) == XCB_KEY_PRESS) {
+                kev = static_cast<xcb_key_press_event_t *>(e);
+            }
+        }
 
-		if ( event->type == KeyPress )
-		{
-			XKeyEvent *key = ( XKeyEvent * ) event;
-			dGlobalHotKey::instance()->hotKeyPressed( id( key->keycode, ( key->state & ( ShiftMask | ControlMask | Mod1Mask | Mod4Mask ) ) ) );
-		}
+        if (kev != 0) {
+            unsigned int keycode = kev->detail;
+            unsigned int keystate = 0;
+            if(kev->state & XCB_MOD_MASK_1)
+                keystate |= Mod1Mask;
+            if(kev->state & XCB_MOD_MASK_CONTROL)
+                keystate |= ControlMask;
+            if(kev->state & XCB_MOD_MASK_4)
+                keystate |= Mod4Mask;
+            if(kev->state & XCB_MOD_MASK_SHIFT)
+                keystate |= ShiftMask;
+
+            dGlobalHotKey::instance()->hotKeyPressed( id( keycode, ( keystate & ( ShiftMask | ControlMask | Mod1Mask | Mod4Mask ) ) ) );
+        }
 	#elif defined( Q_WS_MAC )
 		EventRef event = ( EventRef ) e;
 		if ( GetEventClass( event ) == kEventClassKeyboard && GetEventKind( event ) == kEventHotKeyPressed )
