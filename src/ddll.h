@@ -16,9 +16,11 @@
 #ifndef DDLL_H
 #define DDLL_H
 
+#include <QtGlobal>
+
 #ifdef Q_OS_WIN
 #define NOMINMAX
-#include <windows.h>
+#include <Windows.h>
 
 #include <QtCore/QLibrary>
 
