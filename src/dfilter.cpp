@@ -53,6 +53,7 @@ dFilter::dFilter( dUpload *d ) : m_dupload( d )
 	ui.image->setPixmap(m_current.scaled(ui.image->width(), ui.image->height(), Qt::KeepAspectRatio));
 
 	ui.filterList->setIconSize(QSize(200, 200));
+	ui.filterList->setViewMode(QListView::IconMode);
 
 	loadFilters();
 
@@ -95,8 +96,9 @@ void dFilter::loadFilters()
 	};
 
 	for (dFilterAbstract *filter : filters) {
-		//QListWidgetItem *item = new QListWidgetItem(filter->applyFilter(m_original), filter->name());
-		QListWidgetItem *item = new QListWidgetItem(filter->applyFilter(m_original), NULL);
+		QListWidgetItem *item = new QListWidgetItem(filter->applyFilter(m_original), filter->name());
+		item->setSizeHint(QSize(240, 150));
+		item->setTextAlignment(Qt::AlignCenter);
 		item->setData(Qt::UserRole, QVariant::fromValue((uint64_t)filter));
 		ui.filterList->addItem(item);
 	}
