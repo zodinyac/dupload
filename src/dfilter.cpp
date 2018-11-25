@@ -83,7 +83,7 @@ dFilter::~dFilter()
 {
 }
 
-void dFilter::resizeEvent(QResizeEvent *event)
+void dFilter::resizeEvent(QResizeEvent *)
 {
 	ui.image->setPixmap(m_current.scaled(ui.image->width(), ui.image->height(), Qt::KeepAspectRatio));
 }

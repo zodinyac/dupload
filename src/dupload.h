@@ -41,7 +41,7 @@
 
 #if defined( Q_OS_WIN )
 	#include <lmcons.h>
-	#include <windows.h>
+	#include <Windows.h>
 #elif defined( Q_OS_MAC ) || defined( Q_OS_FREEBSD ) || defined( Q_OS_LINUX ) || defined( Q_OS_UNIX )
 	#include <pwd.h>
 	#include <unistd.h>
@@ -59,7 +59,7 @@ class dUpload : public QWidget, public QAbstractNativeEventFilter
 	Q_OBJECT
 
 public:
-	dUpload( const QString &file, QWidget *parent = 0 );
+	dUpload( const QString &file, QWidget *parent = nullptr );
 	~dUpload();
 
 	void show();
