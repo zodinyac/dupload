@@ -4,6 +4,7 @@ project( dUpload )
 
 set( CMAKE_AUTOMOC TRUE )
 set( CMAKE_INCLUDE_CURRENT_DIR TRUE )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/filters )
 
 find_package(Qt5 COMPONENTS Core Gui Multimedia MultimediaWidgets Network Widgets REQUIRED)
 if( WIN32 )
@@ -53,3 +54,10 @@ if( APPLE )
 
 	set_target_properties( dUpload PROPERTIES MACOSX_BUNDLE_INFO_PLIST "resources/Info.plist" )
 endif( APPLE )
+
+file( GLOB SRC_FILTERS "src/filters/*.cpp" )
+foreach( FILTER_SOURCE ${SRC_FILTERS} )
+    get_filename_component( FILTER_NAME "${FILTER_SOURCE}" NAME_WE )
+    add_library( ${FILTER_NAME} MODULE "src/filters/${FILTER_NAME}.h" "src/dfilterinterface.h" ${FILTER_SOURCE} )
+    target_link_libraries( ${FILTER_NAME} Qt5::Core Qt5::Gui )
+endforeach()
