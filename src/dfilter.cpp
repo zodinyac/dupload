@@ -22,9 +22,6 @@
 #include "dfilter.h"
 #include "dfilterinterface.h"
 
-#include "dfilter_abstract.h"
-#include "dfilter_monochrome.h"
-
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>
 #endif
