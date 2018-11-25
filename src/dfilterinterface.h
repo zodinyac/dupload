@@ -1,8 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
- *                2019 by Bogomolov Danila
+ *  Copyright (c) 2019 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -14,36 +13,26 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DFILTER_H
-#define DFILTER_H
+#ifndef DFILTERINTERFACE_H
+#define DFILTERINTERFACE_H
 
-#include <QtWidgets/QWidget>
-#include <QDir>
+#include <QString>
+#include <QtGui/QPixmap>
+#include <QtPlugin>
 
-#include "dupload.h"
-#include "ui_dfilter.h"
-
-class dFilter : public QWidget
+class dFilterInterface
 {
-	Q_OBJECT
-
 public:
-	dFilter(dUpload *d);
-	~dFilter();
+	virtual ~dFilterInterface() {}
 
-protected:
-	void keyPressEvent(QKeyEvent *event);
-	void resizeEvent(QResizeEvent *event);
-
-private:
-	void loadFilters();
-	void filterActivated(QListWidgetItem *current, QListWidgetItem *);
-
-	Ui::dFilterClass ui;
-	dUpload *m_dupload;
-	QPixmap m_original;
-	QPixmap m_current;
-	QDir filters_dir;
+	virtual QString name() const = 0;
+	virtual QPixmap applyFilter(const QPixmap &pixmap) const = 0;
 };
 
-#endif // DFILTER_H
+#define dFilterInterface_iid "org.deltaz.dUpload.dFilterInterface/1.0"
+
+Q_DECLARE_INTERFACE( dFilterInterface, "org.deltaz.dUpload.dFilterInterface/1.0" )
+
+Q_DECLARE_METATYPE( dFilterInterface * )
+
+#endif // DFILTERINTERFACE_H
