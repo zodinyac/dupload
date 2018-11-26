@@ -187,7 +187,7 @@ dWebCam::dWebCam( dUpload *d ) : m_dupload( d )
 		qDebug() << "codecs" << codecs;
 	}
 
-	connect( m_imageCapture, &QCameraImageCapture::imageCaptured, [=]( int id, const QImage &image )
+	connect( m_imageCapture.data(), &QCameraImageCapture::imageCaptured, [=]( int id, const QImage &image )
 		{
 			qDebug() << id << "captured";
 
@@ -206,7 +206,7 @@ dWebCam::dWebCam( dUpload *d ) : m_dupload( d )
 		}
 	);
 
-	connect( m_imageCapture, &QCameraImageCapture::imageSaved, [=]( int id, const QString &fileName )
+	connect( m_imageCapture.data(), &QCameraImageCapture::imageSaved, [=]( int id, const QString &fileName )
 		{
 			qDebug() << id << "saved" << fileName;
 

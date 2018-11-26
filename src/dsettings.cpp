@@ -53,6 +53,7 @@ void dSettings::show( int index )
 	m_settingsDialog->setAttribute( Qt::WA_QuitOnClose, false );
 	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowContextHelpButtonHint );
 	m_settingsDialog->setWindowFlags( m_settingsDialog->windowFlags() ^ Qt::WindowStaysOnTopHint );
+	m_settingsDialog->setWindowState( m_settingsDialog->windowState() | Qt::WindowActive );
 
 	// media playes names
 	m_settingsUi.MPNamesEdit->setText( get< QString >( "MPNames" ) );

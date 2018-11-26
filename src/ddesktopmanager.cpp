@@ -190,7 +190,7 @@ QPixmap dDesktopManager::makeScreenshot()
 QPixmap dDesktopManager::makeScreenshot( QScreen *screen )
 {
 	QRect g = screen->geometry();
-	QPixmap screenshot = screen->grabWindow( 0, g.x(), g.y(), g.width(), g.height() );
+	QPixmap screenshot = screen->grabWindow( 0 );
 
 	if ( m_selectDialog )
 	{

@@ -42,7 +42,7 @@ dAreaSelector::dAreaSelector( dUpload *d ) : m_dupload( d )
 	resize( m_backgroundPixmap.size() );
 
 	setWindowFlags( Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint );
-	setWindowState( Qt::WindowFullScreen );
+	setWindowState( Qt::WindowFullScreen | Qt::WindowActive );
 	setCursor( Qt::CrossCursor );
 
 	move( dDesktopManager::instance()->getScreenCoord( screen ) );

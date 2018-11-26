@@ -30,11 +30,13 @@ dTrayIcon::dTrayIcon( dUpload *d ) : m_dupload( d )
 	m_menu.addAction( m_dupload->windowIcon(), "Send as PNG" )->setData( 1 );
 	m_menu.addAction( m_dupload->windowIcon(), "Last 10 images" )->setData( 3 );
 
-#if defined ( Q_WS_MAC )
+#if defined ( Q_WS_MAC ) || defined ( Q_WS_X11 )
 	m_menu.addSeparator();
 	m_menu.addAction( m_dupload->windowIcon(), "Show / Hide" )->setData( 2 );
 
-	qt_mac_set_dock_menu( &m_menu );
+	#if !defined ( Q_WS_X11 )
+		qt_mac_set_dock_menu( &m_menu );
+	#endif
 #endif
 
 	setContextMenu( &m_menu );
@@ -93,9 +95,11 @@ void dTrayIcon::updateToolTip()
 
 void dTrayIcon::menuTriggered( QAction *a )
 {
-#if defined ( Q_WS_MAC )
-	if ( a->data().toInt() == 2 )
+#if defined ( Q_WS_MAC ) || defined ( Q_WS_X11 )
+	if ( a->data().toInt() == 2 ) {
 		activated( QSystemTrayIcon::DoubleClick );
+		return;
+	}
 #endif
 	if ( a->data().toInt() == 3 )
 		m_dupload->showLast();
