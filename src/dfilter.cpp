@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
+ *                2019 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -14,13 +15,12 @@
 *****************************************************************************/
 
 #include <QtGui/QPainterPath>
+#include <QPluginLoader>
 #include <vector>
 
 #include "ddesktopmanager.h"
 #include "dfilter.h"
-
-#include "dfilter_abstract.h"
-#include "dfilter_monochrome.h"
+#include "dfilterinterface.h"
 
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>
@@ -53,10 +53,11 @@ dFilter::dFilter( dUpload *d ) : m_dupload( d )
 	ui.image->setPixmap(m_current.scaled(ui.image->width(), ui.image->height(), Qt::KeepAspectRatio));
 
 	ui.filterList->setIconSize(QSize(200, 200));
+	ui.filterList->setViewMode(QListView::IconMode);
 
 	loadFilters();
 
-	connect(ui.filterList, &QListWidget::itemSelectionChanged, this, &dFilter::filterActivated);
+	connect(ui.filterList, &QListWidget::currentItemChanged, this, &dFilter::filterActivated);
 	
 	QPoint window_pos = dDesktopManager::instance()->getScreenCoord( dDesktopManager::instance()->getPrimaryScreen() );
 	move( window_pos );
@@ -82,34 +83,36 @@ dFilter::~dFilter()
 {
 }
 
-void dFilter::resizeEvent(QResizeEvent *event)
+void dFilter::resizeEvent(QResizeEvent *)
 {
 	ui.image->setPixmap(m_current.scaled(ui.image->width(), ui.image->height(), Qt::KeepAspectRatio));
 }
 
 void dFilter::loadFilters()
 {
-	static std::vector<dFilterAbstract *> filters = {
-		new dFilterAbstract(),
-		new dFilterMonochrome()
-	};
+	filters_dir = QDir(qApp->applicationDirPath());
+	filters_dir.cd("filters");
 
-	for (dFilterAbstract *filter : filters) {
-		//QListWidgetItem *item = new QListWidgetItem(filter->applyFilter(m_original), filter->name());
-		QListWidgetItem *item = new QListWidgetItem(filter->applyFilter(m_original), NULL);
-		item->setData(Qt::UserRole, QVariant::fromValue((uint64_t)filter));
-		ui.filterList->addItem(item);
+	const auto filters_list = filters_dir.entryList(QDir::Files);
+
+	for (const QString &file_name : filters_list) {
+		if ( !QLibrary::isLibrary(file_name) )
+			{ continue; }
+		QPluginLoader loader(filters_dir.absoluteFilePath(file_name));
+		auto filter = qobject_cast<dFilterInterface *>(loader.instance());
+		if (filter) {
+			QListWidgetItem *item = new QListWidgetItem(filter->applyFilter(m_original), filter->name());
+			item->setSizeHint(QSize(240, 150));
+			item->setTextAlignment(Qt::AlignCenter);
+			item->setData(Qt::UserRole, QVariant::fromValue(filter));
+			ui.filterList->addItem(item);
+		}
 	}
 }
 
-void dFilter::filterActivated()
+void dFilter::filterActivated(QListWidgetItem *current, QListWidgetItem *)
 {
-	auto selectedItems = ui.filterList->selectedItems();
-	if (selectedItems.size() == 0) {
-		return;
-	}
-
-	dFilterAbstract *filter = (dFilterAbstract *)selectedItems.at(0)->data(Qt::UserRole).toULongLong();
+	auto filter = current->data(Qt::UserRole).value<dFilterInterface *>();
 	m_current = filter->applyFilter(m_original);
 	ui.image->setPixmap(m_current.scaled(ui.image->width(), ui.image->height(), Qt::KeepAspectRatio));
 }

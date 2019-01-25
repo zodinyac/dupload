@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
+ *                2018 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -13,32 +14,22 @@
  ***************************************************************************
 *****************************************************************************/
 
-#include "dfilter_monochrome.h"
+#ifndef DFILTERORIGINAL_H
+#define DFILTERORIGINAL_H
 
-dFilterMonochrome::dFilterMonochrome() : dFilterAbstract()
-{
-}
+#include <QObject>
+#include <QtPlugin>
+#include "dfilterinterface.h"
 
-dFilterMonochrome::~dFilterMonochrome()
+class dFilterOriginal : public QObject, dFilterInterface
 {
-}
+    Q_OBJECT
+	Q_PLUGIN_METADATA( IID dFilterInterface_iid )
+	Q_INTERFACES(dFilterInterface)
 
-QString dFilterMonochrome::name()
-{
-	return "Monochrome";
-}
+public:
+	QString name() const override;
+	QPixmap applyFilter(const QPixmap &pixmap) const override;
+};
 
-QPixmap dFilterMonochrome::applyFilter(const QPixmap &pixmap)
-{
-	QImage image = pixmap.toImage();
-	for (int i = 0; i < image.height(); i++) {
-		uchar *scan = image.scanLine(i);
-		int depth = 4;
-		for (int j = 0; j < image.width(); j++) {
-			QRgb *rgbpixel = reinterpret_cast<QRgb*>(scan + j * depth);
-			int gray = qGray(*rgbpixel);
-			*rgbpixel = QColor(gray, gray, gray).rgba();
-		}
-	}
-	return QPixmap::fromImage(image);
-}
+#endif // DFILTERORIGINAL_H

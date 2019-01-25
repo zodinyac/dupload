@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
+ *                2018 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -13,22 +14,14 @@
  ***************************************************************************
 *****************************************************************************/
 
-#include "dfilter_abstract.h"
+#include "original.h"
 
-dFilterAbstract::dFilterAbstract()
-{
-}
-
-dFilterAbstract::~dFilterAbstract()
-{
-}
-
-QString dFilterAbstract::name()
+QString dFilterOriginal::name() const
 {
 	return "Original";
 }
 
-QPixmap dFilterAbstract::applyFilter(const QPixmap &pixmap)
+QPixmap dFilterOriginal::applyFilter(const QPixmap &pixmap) const
 {
 	return pixmap;
 }

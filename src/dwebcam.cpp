@@ -13,12 +13,12 @@
  ***************************************************************************
 *****************************************************************************/
 
+#include "dwebcam.h"
+
 #ifdef Q_OS_WIN
 #include <QtWinExtras>
-#include "shobjidl.h"
+#include "ShObjIdl.h"
 #endif
-
-#include "dwebcam.h"
 
 QByteArray dWebCam::m_defaultDevice = QByteArray(); 
 

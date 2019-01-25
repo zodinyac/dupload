@@ -2,6 +2,7 @@
  *  dUpload
  *
  *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
+ *                2018 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -16,21 +17,20 @@
 #ifndef DFILTERMONOCHROME_H
 #define DFILTERMONOCHROME_H
 
-#include "dfilter_abstract.h"
+#include <QObject>
+#include <QtPlugin>
+#include "dfilterinterface.h"
 
-class dFilterMonochrome : public dFilterAbstract
+class dFilterMonochrome : public QObject, dFilterInterface
 {
-	Q_OBJECT
+    Q_OBJECT
+	Q_PLUGIN_METADATA( IID dFilterInterface_iid )
+	Q_INTERFACES(dFilterInterface)
 
 public:
-	dFilterMonochrome();
-	~dFilterMonochrome();
-
-	QString name();
-	QPixmap applyFilter(const QPixmap &pixmap);
-
-private:
-
+	QString name() const override;
+	QPixmap applyFilter(const QPixmap &pixmap) const override;
 };
 
 #endif // DFILTERMONOCHROME_H
+

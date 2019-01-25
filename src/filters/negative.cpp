@@ -1,8 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
- *                2019 by Bogomolov Danila
+ *  Copyright (c) 2018 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -14,36 +13,23 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DFILTER_H
-#define DFILTER_H
+#include "negative.h"
 
-#include <QtWidgets/QWidget>
-#include <QDir>
-
-#include "dupload.h"
-#include "ui_dfilter.h"
-
-class dFilter : public QWidget
+QString dFilterNegative::name() const
 {
-	Q_OBJECT
+	return "Negative";
+}
 
-public:
-	dFilter(dUpload *d);
-	~dFilter();
-
-protected:
-	void keyPressEvent(QKeyEvent *event);
-	void resizeEvent(QResizeEvent *event);
-
-private:
-	void loadFilters();
-	void filterActivated(QListWidgetItem *current, QListWidgetItem *);
-
-	Ui::dFilterClass ui;
-	dUpload *m_dupload;
-	QPixmap m_original;
-	QPixmap m_current;
-	QDir filters_dir;
-};
-
-#endif // DFILTER_H
+QPixmap dFilterNegative::applyFilter(const QPixmap &pixmap) const
+{
+	QImage image = pixmap.toImage();
+	for (int i = 0; i < image.height(); i++) {
+		uchar *scan = image.scanLine(i);
+		int depth = 4;
+		for (int j = 0; j < image.width(); j++) {
+			QRgb *rgbpixel = reinterpret_cast<QRgb*>(scan + j * depth);
+			*rgbpixel = QColor(255 - qRed(*rgbpixel), 255 - qGreen(*rgbpixel), 255 - qBlue(*rgbpixel)).rgba();
+		}
+	}
+	return QPixmap::fromImage(image);
+}

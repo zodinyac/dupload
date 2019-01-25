@@ -16,6 +16,7 @@
 #ifndef DWEBCAM_H
 #define DWEBCAM_H
 
+#include <QtGlobal>
 #include <QtGui/QClipboard>
 #include <QtMultimedia/QtMultimedia>
 #include <QtMultimediaWidgets/QtMultimediaWidgets>

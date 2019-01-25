@@ -1,8 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
- *                2019 by Bogomolov Danila
+ *  Copyright (c) 2018 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -14,36 +13,22 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DFILTER_H
-#define DFILTER_H
+#ifndef DFILTERNEGATIVE_H
+#define DFILTERNEGATIVE_H
 
-#include <QtWidgets/QWidget>
-#include <QDir>
+#include <QObject>
+#include <QtPlugin>
+#include "dfilterinterface.h"
 
-#include "dupload.h"
-#include "ui_dfilter.h"
-
-class dFilter : public QWidget
+class dFilterNegative : public QObject, dFilterInterface
 {
-	Q_OBJECT
+    Q_OBJECT
+	Q_PLUGIN_METADATA( IID dFilterInterface_iid )
+	Q_INTERFACES(dFilterInterface)
 
 public:
-	dFilter(dUpload *d);
-	~dFilter();
-
-protected:
-	void keyPressEvent(QKeyEvent *event);
-	void resizeEvent(QResizeEvent *event);
-
-private:
-	void loadFilters();
-	void filterActivated(QListWidgetItem *current, QListWidgetItem *);
-
-	Ui::dFilterClass ui;
-	dUpload *m_dupload;
-	QPixmap m_original;
-	QPixmap m_current;
-	QDir filters_dir;
+	QString name() const override;
+	QPixmap applyFilter(const QPixmap &pixmap) const override;
 };
 
-#endif // DFILTER_H
+#endif // DFILTERNEGATIVE_H

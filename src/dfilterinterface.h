@@ -1,7 +1,7 @@
 /****************************************************************************
  *  dUpload
  *
- *  Copyright (c) 2015 by Belov Nikita <null@deltaz.org>
+ *  Copyright (c) 2019 by Bogomolov Danila
  *
  ***************************************************************************
  *                                                                         *
@@ -13,22 +13,26 @@
  ***************************************************************************
 *****************************************************************************/
 
-#ifndef DFILTERABSTACT_H
-#define DFILTERABSTACT_H
+#ifndef DFILTERINTERFACE_H
+#define DFILTERINTERFACE_H
 
-#include <QtCore/QObject>
+#include <QString>
 #include <QtGui/QPixmap>
+#include <QtPlugin>
 
-class dFilterAbstract : public QObject
+class dFilterInterface
 {
-	Q_OBJECT
-
 public:
-	dFilterAbstract();
-	~dFilterAbstract();
+	virtual ~dFilterInterface() {}
 
-	virtual QString name();
-	virtual QPixmap applyFilter(const QPixmap &pixmap);
+	virtual QString name() const = 0;
+	virtual QPixmap applyFilter(const QPixmap &pixmap) const = 0;
 };
 
-#endif // DFILTERABSTACT_H
+#define dFilterInterface_iid "org.deltaz.dUpload.dFilterInterface/1.0"
+
+Q_DECLARE_INTERFACE( dFilterInterface, "org.deltaz.dUpload.dFilterInterface/1.0" )
+
+Q_DECLARE_METATYPE( dFilterInterface * )
+
+#endif // DFILTERINTERFACE_H
